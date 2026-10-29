@@ -4,7 +4,7 @@
 
 - ໜ້າເວັບ: GitHub Pages (`index.html`)
 - ຂໍ້ມູນລູກຄ້າ ແລະ ຜົນການຕິດຕາມ: Supabase project `vari-trucks`, ຕາຕະລາງ `cust_data`, `cust_track`
-- ທຸກຄົນຕ້ອງໃສ່ **ລະຫັດທີມ** ແລະ **ຊື່ຜູ້ເຮັດ** ກ່ອນເຂົ້າໃຊ້. ລະຫັດທີມເກັບໃນ Supabase secret `CUST_PIN`
+- ທຸກຄົນຕ້ອງໃສ່ **ລະຫັດທີມ** ແລະ **ຊື່ຜູ້ເຮັດ** ກ່ອນເຂົ້າໃຊ້. ລະຫັດທີມເກັບໃນ Supabase secret `VARI_PIN` (ຫຼື `CUST_PIN` ຖ້າມີ)
 - repo ນີ້ບໍ່ມີຂໍ້ມູນລູກຄ້າ
 
 ## ໄຟລ໌
@@ -22,4 +22,4 @@
 
 ## ປ່ຽນລະຫັດທີມ
 
-Supabase dashboard → Edge Functions → Secrets → `CUST_PIN`. ຄົນທີ່ໃຊ້ລະຫັດເກົ່າຈະຖືກໃຫ້ໃສ່ລະຫັດໃໝ່ເອງ.
+Supabase dashboard → Edge Functions → Secrets → `VARI_PIN`. ຄົນທີ່ໃຊ້ລະຫັດເກົ່າຈະຖືກໃຫ້ໃສ່ລະຫັດໃໝ່ເອງ.

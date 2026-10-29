@@ -1,10 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-// Customer follow-up tracker API. Every call needs the team PIN (secret CUST_PIN).
+// Customer follow-up tracker API. Every call needs the team PIN (secret CUST_PIN, else VARI_PIN).
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 // trimmed: a pasted secret often carries a trailing space or newline
-const PIN = (Deno.env.get("CUST_PIN") ?? "").trim();
+const PIN = (Deno.env.get("CUST_PIN") || Deno.env.get("VARI_PIN") || "").trim();
 
 const MAX_FAILS = 10, FAIL_WINDOW_MIN = 15, MAX_BODY = 256 * 1024;
 
