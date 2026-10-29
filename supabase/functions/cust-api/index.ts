@@ -3,7 +3,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // Customer follow-up tracker API. Every call needs the team PIN (secret CUST_PIN).
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-const PIN = Deno.env.get("CUST_PIN") ?? "";
+// trimmed: a pasted secret often carries a trailing space or newline
+const PIN = (Deno.env.get("CUST_PIN") ?? "").trim();
 
 const MAX_FAILS = 10, FAIL_WINDOW_MIN = 15, MAX_BODY = 256 * 1024;
 
@@ -28,12 +29,15 @@ Deno.serve(async (req) => {
   let p: any;
   try { p = await req.json(); } catch { return json({ error: "bad_json" }, 400); }
 
+  // not a wrong guess: the secret is missing, so nobody can get in yet
+  if (!PIN) return json({ error: "pin_not_set" }, 503);
+
   // slow down PIN guessing per address
   const ip = (req.headers.get("x-forwarded-for") ?? "?").split(",")[0].trim();
   const since = new Date(Date.now() - FAIL_WINDOW_MIN * 60e3).toISOString();
   const { count } = await sb.from("cust_fails").select("id", { count: "exact", head: true }).eq("ip", ip).gte("at", since);
   if ((count ?? 0) >= MAX_FAILS) return json({ error: "locked" }, 429);
-  if (!PIN || !same(String(p.pin ?? ""), PIN)) {
+  if (!same(String(p.pin ?? "").trim(), PIN)) {
     await sb.from("cust_fails").insert({ ip });
     return json({ error: "bad_pin" }, 401);
   }

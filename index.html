@@ -910,7 +910,7 @@ async function api(action,extra={}){
   if(!r.ok) throw Object.assign(new Error(j.error||('HTTP '+r.status)),{code:j.error||'http',status:r.status});
   return j;
 }
-const gateMsg=e=>e.status===401?'ລະຫັດທີມບໍ່ຖືກ':e.status===429?'ລອງຜິດຫຼາຍເທື່ອ ລໍຖ້າ 15 ນາທີ ແລ້ວລອງໃໝ່':'ເຊື່ອມຕໍ່ບໍ່ໄດ້ ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່';
+const gateMsg=e=>e.code==='pin_not_set'?'ລະບົບຍັງບໍ່ໄດ້ຕັ້ງລະຫັດທີມ · ແຈ້ງຜູ້ຈັດການ':e.status===401?'ລະຫັດທີມບໍ່ຖືກ':e.status===429?'ລອງຜິດຫຼາຍເທື່ອ ລໍຖ້າ 15 ນາທີ ແລ້ວລອງໃໝ່':'ເຊື່ອມຕໍ່ບໍ່ໄດ້ ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່';
 
 // Nobody sees data or saves anything until they give the team PIN and their name.
 function ensureLogin(){
