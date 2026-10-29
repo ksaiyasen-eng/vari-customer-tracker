@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="lo">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ຕິດຕາມລູກຄ້າ VARI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky header + tab rail; overview = plan steps + branch table; queue = filter bar over an expandable list */
+:root{
+  --bg:#f3f6f8; --panel:#ffffff; --ink:#10212e; --muted:#5b6b78; --line:#d9e1e7;
+  --accent:#0b6e99; --accent-ink:#ffffff; --accent-soft:#e2f0f6;
+  --crit:#b42318; --crit-soft:#fde8e6; --warn:#b54708; --warn-soft:#fdf0e1;
+  --mid:#175cd3; --mid-soft:#e6eefc; --ok:#067647; --ok-soft:#dff4e8; --idle:#667085; --idle-soft:#eef0f3;
+  --f-body:"Noto Sans Lao","Phetsarath OT","Saysettha OT",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1820; --panel:#14232e; --ink:#e4edf2; --muted:#93a5b2; --line:#26394a;
+  --accent:#4fb3dc; --accent-ink:#06202c; --accent-soft:#16364a;
+  --crit:#ff8a7a; --crit-soft:#3a1a17; --warn:#f5b166; --warn-soft:#3a2914;
+  --mid:#86aefc; --mid-soft:#1a2a4a; --ok:#5fd39a; --ok-soft:#123326; --idle:#a0abb8; --idle-soft:#1e2b36; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1820; --panel:#14232e; --ink:#e4edf2; --muted:#93a5b2; --line:#26394a;
+  --accent:#4fb3dc; --accent-ink:#06202c; --accent-soft:#16364a;
+  --crit:#ff8a7a; --crit-soft:#3a1a17; --warn:#f5b166; --warn-soft:#3a2914;
+  --mid:#86aefc; --mid-soft:#1a2a4a; --ok:#5fd39a; --ok-soft:#123326; --idle:#a0abb8; --idle-soft:#1e2b36; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.top{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-block:10px}
+h1{font-size:19px;margin:0;font-weight:700;text-wrap:balance}
+.asof{color:var(--muted);font-size:13px}
+.me{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px;min-width:0}
+textarea{width:100%;min-height:64px;resize:vertical}
+button{cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--panel);padding:6px 12px}
+button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;scrollbar-width:thin}
+nav button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;white-space:nowrap;color:var(--muted)}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+nav .n{font-family:var(--f-mono);font-size:12px;margin-left:6px;color:var(--muted)}
+main{padding-block:20px 60px}
+h2{font-size:17px;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px}
+@media (max-width:820px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:4px 12px;cursor:pointer;padding:10px;border-radius:8px;border:1px solid transparent;background:none;text-align:left;width:100%}
+.step:hover{border-color:var(--line);background:var(--bg)}
+.step .num{grid-row:span 3;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-family:var(--f-mono)}
+.step .when{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.step b{font-weight:600}
+.bar{height:8px;background:var(--idle-soft);border-radius:4px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .d{background:var(--ok)} .bar .g{background:var(--warn)}
+.prog{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
+.prog .bar{flex:1}
+.mono,.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:13px}
+.tblw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:13px}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums}
+.rhythm{margin:0;padding-left:18px;display:grid;gap:6px;font-size:14px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filters input{flex:1 1 220px}
+.filters select{flex:0 1 200px}
+.count{font-size:13px;color:var(--muted);margin-bottom:8px}
+.list{display:grid;gap:6px}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.rh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:10px 12px;cursor:pointer;width:100%;background:none;border:0;text-align:left}
+.rh .nm{font-weight:600;overflow-wrap:anywhere}
+.rh .meta{grid-column:2/4;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:2px 14px}
+.chip{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;white-space:nowrap;background:var(--idle-soft);color:var(--idle)}
+.c-crit{background:var(--crit-soft);color:var(--crit)} .c-warn{background:var(--warn-soft);color:var(--warn)}
+.c-mid{background:var(--mid-soft);color:var(--mid)} .c-ok{background:var(--ok-soft);color:var(--ok)}
+.st{font-size:12px;white-space:nowrap}
+.det{border-top:1px solid var(--line);padding:12px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:720px){.det{grid-template-columns:minmax(0,1fr)}}
+dl{margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 12px;font-size:14px}
+dt{color:var(--muted)} dd{margin:0;overflow-wrap:anywhere}
+.form{display:grid;gap:10px;align-content:start}
+.form label{font-size:13px;color:var(--muted);display:grid;gap:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chk{display:flex!important;align-items:center;gap:8px;color:var(--ink)!important;font-size:14px!important}
+.saved{font-size:13px;color:var(--muted)}
+.more{margin:12px auto 0;display:block}
+.empty{color:var(--muted);padding:24px;text-align:center}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s}}
+.rptop{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:end;justify-content:space-between;margin-bottom:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.tile .v{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.tile .l{font-size:13px;color:var(--muted)}
+.tile .s{font-size:12px;color:var(--muted)}
+.cols{display:flex;align-items:flex-end;gap:4px;height:150px;padding-top:18px;border-bottom:1px solid var(--line)}
+.cols .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative;min-width:0}
+.cols .c i{display:block;width:70%;max-width:28px;background:var(--accent);border-radius:4px 4px 0 0;min-height:0}
+.cols .c:hover i{opacity:.75}
+.cols .c b{position:absolute;font-size:11px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.xlab{display:flex;gap:4px;font-size:11px;color:var(--muted);font-family:var(--f-mono)}
+.xlab span{flex:1;text-align:center;min-width:0;overflow:hidden}
+.hb{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,2fr) auto;gap:6px 10px;align-items:center;font-size:14px}
+.hb .t{height:14px;background:var(--idle-soft);border-radius:0 4px 4px 0}
+.hb .t i{display:block;height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.hb .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.gd{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:20px;align-items:start}
+.gd .card{min-width:0}
+h3{font-size:16px;margin:0 0 10px}
+.howto{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px;max-width:65ch}
+td.wr{white-space:normal;min-width:200px}
+.cntrow{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-bottom:8px}
+.cntrow .count{margin:0}
+.ownl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.ownl .warn{color:var(--warn)}
+.hist{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:13px;border-top:1px solid var(--line);padding-top:8px}
+.hist li{display:grid;gap:0}
+.hist .when{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.due{display:grid;gap:6px}
+.due button{display:flex;justify-content:space-between;gap:12px;text-align:left;width:100%}
+.due b{font-variant-numeric:tabular-nums}
+.fix{border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.fix summary{cursor:pointer;font-weight:600;font-size:14px}
+.fix[open] summary{margin-bottom:8px}
+.fixg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:8px 12px}
+.fixg label.miss{color:var(--crit)}
+.fixg label.miss input,.fixg label.miss select{border-color:var(--crit)}
+.fixg .days{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--ink)}
+.fixg .days label{display:flex;gap:4px;align-items:center}
+.fixg .wide{grid-column:1/-1}
+.ferr{color:var(--crit);font-size:13px}
+button.lnk{border:0;background:none;padding:0;color:var(--accent);text-align:left;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.loading{display:flex;gap:12px;align-items:center;justify-content:center;padding:60px 0;color:var(--muted)}
+.spin{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);flex:none}
+@media (prefers-reduced-motion:no-preference){.spin{animation:spin .8s linear infinite}}
+@keyframes spin{to{transform:rotate(360deg)}}
+[hidden]{display:none!important}
+body{margin:0;font-size:14px}
+.gate{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;place-items:center;padding:16px}
+.gate form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;width:min(100%,380px);display:grid;gap:14px}
+.gate h2{margin:0;font-size:19px}
+.gate label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+.gate input{font-size:16px;padding:10px 12px}
+.gate .pri{padding:10px}
+</style>
+</head>
+<body>
+<div id="gate" class="gate" hidden>
+  <form id="gateF" autocomplete="on">
+    <h2>ຕິດຕາມລູກຄ້າ VARI</h2>
+    <p class="asof" style="margin:0">ໃສ່ລະຫັດທີມ ແລະ ຊື່ຂອງທ່ານກ່ອນເຂົ້າໃຊ້ · ທຸກການບັນທຶກຈະໃຊ້ຊື່ນີ້</p>
+    <label for="gPin">ລະຫັດທີມ<input id="gPin" type="password" autocomplete="current-password" required></label>
+    <label for="gName">ຊື່ຜູ້ເຮັດ (ຊື່ທີ່ທີມຮູ້ຈັກ ເຊັ່ນ ແອັດມິນ ນ້ອຍ)<input id="gName" autocomplete="name" minlength="2" required></label>
+    <p id="gErr" class="ferr" style="margin:0" role="alert"></p>
+    <button class="pri" type="submit">ເຂົ້າໃຊ້</button>
+  </form>
+</div>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>ຕິດຕາມລູກຄ້າ VARI</h1>
+        <div class="asof">ຂໍ້ມູນຈາກການກວດ 29/10/2026 · ບິນ 01/01–28/10/2026</div>
+      </div>
+      <div class="me">
+        <label for="who" class="asof">ຊື່ຜູ້ເຮັດ</label>
+        <input id="who" placeholder="ເຊັ່ນ ແອັດມິນ ນ້ອຍ" size="14">
+        <button id="switchUser" type="button" hidden>ປ່ຽນຜູ້ໃຊ້</button>
+        <button id="exp" hidden>ສົ່ງອອກຜົນ (CSV)</button>
+        <button id="expLoo" hidden>ສົ່ງອອກຂໍ້ມູນແກ້ → LOO</button>
+        <button id="expFix" hidden>ຂໍ້ມູນແກ້ ຄົບທຸກຊ່ອງ</button>
+      </div>
+    </div>
+    <nav id="tabs" role="tablist"></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner" class="banner" hidden></div>
+  <div id="loading" class="loading" role="status"><span class="spin" aria-hidden="true"></span>ກຳລັງໂຫຼດຂໍ້ມູນລູກຄ້າ… (ປະມານ 6,000 ລາຍ ໃຊ້ເວລາບໍ່ເທົ່າໃດວິນາທີ)</div>
+  <section id="ov" hidden></section>
+  <section id="rp" hidden></section>
+  <section id="lg" hidden></section>
+  <section id="gd" hidden>
+    <h2>ຄູ່ມືການຕິດຕາມລູກຄ້າ</h2>
+    <p class="sub">ອ່ານກ່ອນເລີ່ມວຽກ · ທຸກຄົນໃນທີມໃຊ້ໜ້ານີ້ຮ່ວມກັນ ຜົນທີ່ບັນທຶກທຸກຄົນເຫັນທັນທີ</p>
+    <div class="gd">
+      <div class="card">
+        <h3>ໃຜເຮັດຫຍັງ</h3>
+        <div class="tblw"><table><thead><tr><th>ບົດບາດ</th><th>ແຖບທີ່ຮັບຜິດຊອບ</th><th>ວຽກ</th></tr></thead><tbody>
+          <tr><td><b>ແອັດມິນ / CS</b></td><td>ບໍ່ເຄື່ອນໄຫວ · ສົ່ງຢູ່ ບໍ່ໄດ້ອັບເດດ</td><td class="wr">ໂທຖາມລູກຄ້າ ບັນທຶກຜົນ ແກ້ຂໍ້ມູນໃນ LOO</td></tr>
+          <tr><td><b>ທີມສົ່ງ</b></td><td>ສົ່ງຢູ່ ບໍ່ໄດ້ອັບເດດ (ກັ່ນຕອງທີມຕົນເອງ)</td><td class="wr">ຮອບສົ່ງຕໍ່ໄປ: ປັກ GPS ນັບຕຸກ ຖ່າຍຮູບໜ້າເຮືອນ ຂໍເບີທີ່ຖືກ</td></tr>
+          <tr><td><b>ຜູ້ຈັດການ</b></td><td>ລູກຄ້າໃໝ່ · ລູກຄ້າຊ້ຳ · ສະເໜີປິດໃຊ້ງານ</td><td class="wr">ຕັດສິນ ລວມ / ແຍກ / ປິດ / ເກັບໄວ້ · ກວດລາຍງານທ້າຍອາທິດ</td></tr>
+          <tr><td><b>ໄອທີ</b></td><td>ຜິດປົກກະຕິ</td><td class="wr">ແກ້ເບີ / GPS ໃຊ້ຮ່ວມກັນ ບັນຊີພາຍໃນ ລະຫັດບໍ່ມີໃນລາຍຊື່</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="card">
+        <h3>ຂັ້ນຕອນບັນທຶກຜົນ 1 ລູກຄ້າ</h3>
+        <ol class="howto">
+          <li>ເຂົ້າສູ່ລະບົບ claude.ai ກ່ອນ · ຊ່ອງ "ຊື່ຜູ້ເຮັດ" ຈະໃສ່ຊື່ຈາກບັນຊີໃຫ້ເອງ ແລະ ແກ້ບໍ່ໄດ້ ທຸກການບັນທຶກຈຶ່ງຮູ້ວ່າໃຜເຮັດແທ້</li>
+          <li>ເລືອກແຖບວຽກ ແລ້ວກັ່ນຕອງ ສາຂາ / ທີມ / ຄວາມສຳຄັນ · ເລີ່ມຈາກ "ດ່ວນຫຼາຍ" ແລະ "ດ່ວນ" ສະເໝີ</li>
+          <li>ກົດ "ຮັບ 20 ລາຍການທຳອິດທີ່ຍັງບໍ່ມີຜູ້ຮັບ" ຫຼື "ຮັບວຽກນີ້" ໃນແຕ່ລະລູກຄ້າ · ເລືອກ "ວຽກຂອງຂ້ອຍ" ເພື່ອເຫັນສະເພາະວຽກຕົນເອງ · ຢ່າໂທລູກຄ້າທີ່ຄົນອື່ນຮັບແລ້ວ</li>
+          <li>ກົດຊື່ລູກຄ້າ ອ່ານຖັນ "ແອັດມິນໂທຖາມ" ແລະ "ຂໍ້ມູນແນະນຳຈາກປະຫວັດການສັ່ງ" ກ່ອນໂທ</li>
+          <li>ໂທ ຫຼື ກວດໜ້າງານ · ຢືນຢັນຂໍ້ມູນແນະນຳກັບລູກຄ້າກ່ອນ ຢ່າບັນທຶກຕາມທີ່ແນະນຳເລີຍ</li>
+          <li>ເລືອກ "ຜົນ" · ຂຽນຂໍ້ມູນໃໝ່ທີ່ໄດ້ໃນ "ບັນທຶກ" (ມື້ສົ່ງ ເບີໃໝ່ ເຫດຜົນ ຈຳນວນຕຸກ)</li>
+          <li>ຖ້າຍັງບໍ່ຈົບ ໃສ່ "ນັດໂທຄືນ / ນັດກວດ / ນັດເກັບຕຸກ" · ເລືອກ "ໂທບໍ່ຕິດ" ລະບົບນັດມື້ອື່ນໃຫ້ເອງ (ປ່ຽນໄດ້)</li>
+          <li>ເລືອກສະຖານະ ແລ້ວກົດ "ບັນທຶກ" · ທຸກຄັ້ງທີ່ບັນທຶກຈະເກັບເຂົ້າ "ປະຫວັດ" ຂອງລູກຄ້າ ເຫັນວ່າໂທມາແລ້ວຈັກຄັ້ງ</li>
+          <li>ເລີ່ມວຽກທຸກເຊົ້າຈາກກ່ອງ "ມື້ນີ້ຕ້ອງຕິດຕາມ" ໃນແຖບພາບລວມ ກ່ອນຮັບວຽກໃໝ່</li>
+          <li>ແກ້ຂໍ້ມູນໃນ LOO ແລ້ວກັບມາໝາຍ "ອັບເດດໃນ LOO ແລ້ວ" ແລະ ປ່ຽນເປັນ "ສຳເລັດ"</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>ແກ້ຂໍ້ມູນ ແລະ ອັບເດດເຂົ້າ LOO</h3>
+        <ol class="howto">
+          <li>ກົດຊື່ລູກຄ້າ → ເປີດ "ແກ້ຂໍ້ມູນສຳລັບ LOO" · ຊ່ອງສີແດງ = ຂໍ້ມູນທີ່ຂາດ ຫຼື ບໍ່ຖືກ ຕາມການກວດ</li>
+          <li>ໃສ່ສະເພາະຊ່ອງທີ່ຕ້ອງປ່ຽນ ຊ່ອງວ່າງ = ບໍ່ປ່ຽນ · "ໃຊ້ຂໍ້ມູນແນະນຳ" ເຕີມມື້ສົ່ງ / ພຶດຕິກຳ / ສາຂາ ຈາກບິນໃຫ້ ແຕ່ຕ້ອງຢືນຢັນກັບລູກຄ້າກ່ອນ</li>
+          <li>ກົດ "ບັນທຶກ" · ເບີໂທ ແລະ GPS ຖືກກວດຮູບແບບໃຫ້ (ເບີ 8 ຕົວ ເຕີມ 20 ໃຫ້ເອງ)</li>
+          <li>ກັ່ນຕອງ "ຂໍ້ມູນທີ່ຂາດ" ເພື່ອແບ່ງວຽກ ເຊັ່ນ ຂາດ: ມື້ຈັດສົ່ງ · ແຖບ "ຂໍ້ມູນບໍ່ຄົບ" ແມ່ນລູກຄ້າສັ່ງປົກກະຕິ 1,830 ລາຍ ທີ່ບໍ່ຢູ່ແຖບອື່ນ</li>
+          <li>ທ້າຍມື້ ກົດ "ສົ່ງອອກຂໍ້ມູນແກ້ → LOO": ໄດ້ໄຟລ໌ຕາມແບບນຳເຂົ້າ LOO (ລະຫັດ ຊື່ ເບີ ປະເພດ ບ້ານ ເມືອງ ແຂວງ) · ຊ່ອງທີ່ບໍ່ໄດ້ແກ້ ໃສ່ຂໍ້ມູນເດີມໃຫ້</li>
+          <li>GPS ສາຂາ ມື້ຈັດສົ່ງ ພຶດຕິກຳ ຕຸກມັດຈຳ ບໍ່ມີໃນແບບນຳເຂົ້າ LOO: ກົດ "ຂໍ້ມູນແກ້ ຄົບທຸກຊ່ອງ" ແລ້ວແກ້ໃນ LOO ດ້ວຍມື</li>
+          <li>ແກ້ໃນ LOO ແລ້ວ ກັ່ນຕອງສະຖານະ "ແກ້ຂໍ້ມູນແລ້ວ ລໍຖ້າເຂົ້າ LOO" ແລະ ໝາຍ "ອັບເດດໃນ LOO ແລ້ວ" ທີລະລາຍ</li>
+          <li>ຖ້າແກ້ຂໍ້ມູນລູກຄ້າທີ່ເຂົ້າ LOO ແລ້ວອີກ ລະບົບຈະເອົາເຄື່ອງໝາຍ LOO ອອກ ເພື່ອໃຫ້ສົ່ງອອກຮອບໃໝ່</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h3>ຄວາມໝາຍຂອງສະຖານະ</h3>
+        <dl>
+          <dt><span class="chip">ຍັງບໍ່ໄດ້ເຮັດ</span></dt><dd>ຍັງບໍ່ມີໃຜໂທ ຫຼື ກວດ</dd>
+          <dt><span class="chip c-warn">ກຳລັງຕິດຕາມ</span></dt><dd>ເລີ່ມແລ້ວ ແຕ່ຍັງບໍ່ຈົບ ເຊັ່ນ ໂທບໍ່ຕິດ ລໍຖ້າທີມສົ່ງກວດ ລໍຖ້າເກັບຕຸກ ລໍຖ້າຜູ້ຈັດການຕັດສິນ</dd>
+          <dt><span class="chip c-ok">ສຳເລັດ</span></dt><dd>ໄດ້ຂໍ້ມູນຄົບ ແລະ ແກ້ໃນ LOO ແລ້ວ ຫຼື ຜູ້ຈັດການຕັດສິນແລ້ວ · ລາຍການຈະອອກຈາກລາຍຊື່ "ຍັງບໍ່ສຳເລັດ"</dd>
+        </dl>
+      </div>
+
+      <div class="card">
+        <h3>ໄດ້ຜົນແບບນີ້ ເຮັດຫຍັງຕໍ່</h3>
+        <div class="tblw"><table><thead><tr><th>ຜົນ</th><th>ເຮັດຕໍ່</th></tr></thead><tbody>
+          <tr><td>ໂທບໍ່ຕິດ</td><td class="wr">ໂທຄືນອີກ 2 ຄັ້ງ ຄົນລະມື້ ຄົນລະເວລາ (ເບິ່ງ "ຕິດຕາມ N ຄັ້ງ" ໃນລາຍຊື່) · ຄັ້ງທີ 3 ຍັງບໍ່ຕິດ → ສົ່ງໃຫ້ທີມສົ່ງຖາມໜ້າງານ</td></tr>
+          <tr><td>ເບີຜິດ / ບໍ່ມີຜູ້ໃຊ້</td><td class="wr">ທີມສົ່ງຂໍເບີໃໝ່ຮອບສົ່ງຕໍ່ໄປ · ລູກຄ້າບໍ່ເຄື່ອນໄຫວ ແລະ ຫາບໍ່ພົບ → ແຈ້ງຜູ້ຈັດການ</td></tr>
+          <tr><td>ຈະສັ່ງຄືນ</td><td class="wr">ນັດມື້ສົ່ງ ແຈ້ງສາຂາ · ໝາຍ "ສຳເລັດ" ເມື່ອອອກບິນແລ້ວ</td></tr>
+          <tr><td>ໄປໃຊ້ຍີ່ຫໍ້ອື່ນ / ບໍ່ພໍໃຈການບໍລິການ</td><td class="wr">ຂຽນເຫດຜົນໃຫ້ລະອຽດ (ລາຄາ ສົ່ງຊ້າ ຕຸກເປື້ອນ ...) · ແຈ້ງຜູ້ຈັດການສາຂາພາຍໃນມື້</td></tr>
+          <tr><td>ເຊົາໃຊ້ແລ້ວ / ຍ້າຍບ້ານ</td><td class="wr">ນັດເກັບຕຸກ ຫຼື ຄືນມັດຈຳ · ຂຽນຈຳນວນຕຸກໃນບັນທຶກ · ຜູ້ຈັດການພິຈາລະນາປິດ</td></tr>
+          <tr><td>ສົ່ງໃຫ້ທີມສົ່ງກວດໜ້າງານ</td><td class="wr">ສະຖານະ "ກຳລັງຕິດຕາມ" · ທີມສົ່ງບັນທຶກ "ທີມສົ່ງກວດແລ້ວ" ພ້ອມ GPS ຕຸກ ຮູບ</td></tr>
+        </tbody></table></div>
+        <p class="sub" style="margin:8px 0 0">ຈຳນວນຄັ້ງທີ່ໂທຄືນ ເປັນຂໍ້ແນະນຳ ຜູ້ຈັດການປັບໄດ້</p>
+      </div>
+
+      <div class="card">
+        <h3>ກົດລະບຽບສຳຄັນ</h3>
+        <ul class="howto">
+          <li><b>ປິດໃຊ້ງານໃນ LOO ເທົ່ານັ້ນ ຫ້າມລົບ</b> · ເປີດຄືນໄດ້ຖ້າລູກຄ້າກັບມາ</li>
+          <li><b>ກວດຕຸກມັດຈຳກ່ອນປິດທຸກຄັ້ງ</b> · ລາຍຊື່ສະເໜີປິດມີ 1,577 ລະຫັດຍັງຖືຕຸກ ລວມ 10,775 ຕຸກ (588,715,505 ກີບ)</li>
+          <li>ຂໍ້ມູນແນະນຳ (ມື້ສົ່ງ ພຶດຕິກຳ ສາຂາ) ມາຈາກບິນ 90 ມື້ ຕ້ອງຢືນຢັນກັບລູກຄ້າກ່ອນບັນທຶກ</li>
+          <li>ລູກຄ້າໃນລາຍຊື່ສະເໜີປິດ ບໍ່ຕ້ອງເສຍເວລາແກ້ຂໍ້ມູນ</li>
+          <li>ລູກຄ້າຊ້ຳ: ຜູ້ຈັດການຕັດສິນກ່ອນ ແລ້ວແອັດມິນຈຶ່ງແກ້ຂໍ້ມູນ ເພື່ອບໍ່ແກ້ລະຫັດທີ່ຈະຖືກປິດ</li>
+          <li>ບັນທຶກທັນທີຫຼັງໂທແຕ່ລະສາຍ ຢ່າເກັບໄວ້ບັນທຶກທ້າຍມື້</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>ການລາຍງານ</h3>
+        <ul class="howto">
+          <li><b>ທຸກມື້ (ແອັດມິນ):</b> ກວດແຖບ "ລາຍງານຜົນ" ຊ່ວງ "ມື້ນີ້" ວ່າບັນທຶກຄົບທຸກສາຍທີ່ໂທ</li>
+          <li><b>ທ້າຍອາທິດ (ຜູ້ຈັດການ):</b> ເບິ່ງ "ລາຍງານຜົນ" ຊ່ວງ 7 ມື້ · ຜົນງານແຕ່ລະຄົນ · ສາຂາທີ່ຄ້າງຫຼາຍໃນ "ພາບລວມ"</li>
+          <li><b>ການເຄື່ອນໄຫວ:</b> ແຖບ "ການເຄື່ອນໄຫວ" ສະແດງທຸກການບັນທຶກ ແລະ ການຮັບວຽກ ວ່າໃຜ ເຮັດຫຍັງ ກັບລູກຄ້າໃດ ເວລາໃດ · ກັ່ນຕອງຕາມຄົນ ແລະ ແຖບໄດ້</li>
+          <li><b>ສົ່ງອອກ CSV:</b> ໃຊ້ແກ້ LOO ເປັນຊຸດ ຫຼື ເກັບເປັນຫຼັກຖານປະຈຳອາທິດ</li>
+          <li><b>ເປົ້າໝາຍ:</b> ລາຍການ "ດ່ວນຫຼາຍ" ແລະ "ດ່ວນ" ສຳເລັດພາຍໃນອາທິດທຳອິດ</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>ນິຍາມ</h3>
+        <dl>
+          <dt>ບິນ 90 ມື້</dt><dd>ບິນຕັ້ງແຕ່ 31/07/2026 ຫາ 28/10/2026</dd>
+          <dt>ປົກກະຕິສັ່ງທຸກ (ມື້)</dt><dd>ຄ່າກາງຂອງໄລຍະຫ່າງລະຫວ່າງມື້ສັ່ງ (ຕ້ອງມີຢ່າງໜ້ອຍ 3 ມື້ສັ່ງ)</dd>
+          <dt>ຂາດການສັ່ງຜິດປົກກະຕິ</dt><dd>ບໍ່ສັ່ງມາ &gt; 2.5 ເທົ່າຂອງ "ປົກກະຕິສັ່ງທຸກ" ແລະ ເກີນ 21 ມື້</dd>
+          <dt>ຄວນຍ້າຍສາຂາ</dt><dd>ສາຂາທີ່ອອກບິນ 90 ມື້ ≥60% ບໍ່ກົງກັບສາຂາໃນລະບົບ</dd>
+          <dt>ເບີໂທບໍ່ຖືກ</dt><dd>ຫຼັງຕັດ 856 ແລະ 0 ທາງໜ້າ ບໍ່ແມ່ນ 20xxxxxxxx / 30xxxxxxx / 21xxxxxx · ບັນທຶກແຕ່ 8 ຕົວ ຄວນເຕີມ 20 ທາງໜ້າ</dd>
+          <dt>GPS ຊ້ຳ</dt><dd>ພິກັດດຽວກັນໃຊ້ 5 ລະຫັດຂຶ້ນໄປ = ພິກັດແທນ ບໍ່ແມ່ນເຮືອນລູກຄ້າ</dd>
+          <dt>ຊື່ບໍ່ຊັດເຈນ</dt><dd>ຊື່ 1–2 ຕົວອັກສອນ ມີແຕ່ຕົວເລກ ຫຼື ຊື່ຊ້ຳກັບລູກຄ້າອື່ນ 5 ຄົນຂຶ້ນໄປ (ເຊັ່ນ ເອື້ອຍນ້ອຍ)</dd>
+          <dt>ລະຫັດຊ້ຳ</dt><dd>ເບີດຽວກັນ ແລະ ຊື່ຄ້າຍກັນ · ຫຼື ເບີຂອງລະຫັດທີ່ບໍ່ສັ່ງ ກົງກັບເບີໃນບິນຂອງລະຫັດອື່ນທີ່ສັ່ງຢູ່</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+  <section id="qv" hidden>
+    <h2 id="qt"></h2>
+    <p class="sub" id="qs"></p>
+    <div class="filters">
+      <input id="fq" type="search" placeholder="ຄົ້ນຫາ ຊື່ / ເບີ / ລະຫັດ">
+      <select id="fb" aria-label="ສາຂາ"></select>
+      <select id="fp" aria-label="ຄວາມສຳຄັນ"></select>
+      <select id="fx" aria-label="ກຸ່ມຍ່ອຍ"></select>
+      <select id="fs" aria-label="ສະຖານະ"></select>
+      <select id="fo" aria-label="ຜູ້ຮັບວຽກ"></select>
+      <select id="fm" aria-label="ຂໍ້ມູນທີ່ຂາດ"></select>
+      <select id="fsort" aria-label="ຮຽງລຳດັບ"></select>
+    </div>
+    <div class="cntrow"><div class="count" id="cnt"></div>
+      <button id="claimN" type="button">ຮັບ 20 ລາຍການທຳອິດທີ່ຍັງບໍ່ມີຜູ້ຮັບ</button><span class="saved" id="claimMsg"></span></div>
+    <div class="list" id="list"></div>
+    <button class="more" id="more" hidden>ສະແດງເພີ່ມ</button>
+  </section>
+</main>
+
+<script>
+const ST={todo:'ຍັງບໍ່ໄດ້ເຮັດ',doing:'ກຳລັງຕິດຕາມ',done:'ສຳເລັດ'};
+const CALL=['ໂທບໍ່ຕິດ','ເບີຜິດ / ບໍ່ມີຜູ້ໃຊ້'];
+const CFG={
+  q1:{name:'ສົ່ງຢູ່ ບໍ່ໄດ້ອັບເດດ',who:'ແອັດມິນ + ທີມສົ່ງ',job:'ແອັດມິນໂທຢືນຢັນ · ທີມສົ່ງກວດໜ້າງານ (GPS ຕຸກ ຮູບ) · ແກ້ໃນ LOO',
+      x:'ທີມ / ຄົນສົ່ງລ່າສຸດ',tag:false,loo:true,
+      res:['ຢືນຢັນ ແລະ ແກ້ຂໍ້ມູນແລ້ວ','ແກ້ສາຂາແລ້ວ','ໄດ້ມື້ສົ່ງ / ພຶດຕິກຳແລ້ວ','ສົ່ງໃຫ້ທີມສົ່ງກວດໜ້າງານ','ທີມສົ່ງກວດແລ້ວ (GPS ຕຸກ ຮູບ)',...CALL]},
+  q2:{name:'ບໍ່ເຄື່ອນໄຫວ',who:'ແອັດມິນ / CS',job:'ໂທຖາມເຫດຜົນ ຊວນສັ່ງຄືນ · ເລີ່ມຈາກ "ດ່ວນຫຼາຍ"',
+      x:'ທີມ / ຄົນສົ່ງລ່າສຸດ',tag:true,loo:true,
+      res:['ຈະສັ່ງຄືນ','ຍັງໃຊ້ ແຕ່ສັ່ງຫ່າງ','ໄປໃຊ້ຍີ່ຫໍ້ອື່ນ','ບໍ່ພໍໃຈການບໍລິການ','ຍ້າຍບ້ານ / ຍ້າຍຮ້ານ','ເຊົາໃຊ້ແລ້ວ → ເກັບຕຸກ ແລ້ວສະເໜີປິດ',...CALL]},
+  q3:{name:'ສະເໜີປິດໃຊ້ງານ',who:'ຜູ້ຈັດການ',job:'ອະນຸມັດ ປິດ / ເກັບໄວ້ · ກວດຕຸກມັດຈຳກ່ອນປິດ · ປິດໃນ LOO ເທົ່ານັ້ນ ຫ້າມລົບ',
+      tag:true,loo:true,res:['ອະນຸມັດປິດ','ເກັບໄວ້ (ລູກຄ້າຍັງໃຊ້)','ລໍຖ້າເກັບຕຸກ / ຄືນມັດຈຳ','ເກັບຕຸກ / ຄືນມັດຈຳແລ້ວ']},
+  q4:{name:'ລູກຄ້າໃໝ່',who:'ຜູ້ຈັດການ',job:'ຕື່ມຂໍ້ມູນໃຫ້ຄົບ · ຕິດຕາມການສັ່ງຄັ້ງທຳອິດ',
+      tag:true,loo:true,res:['ຕື່ມຂໍ້ມູນຄົບແລ້ວ','ສັ່ງຄັ້ງທຳອິດແລ້ວ','ບໍ່ສົນໃຈແລ້ວ',...CALL]},
+  q5:{name:'ລູກຄ້າຊ້ຳ-ຄ້າຍກັນ',who:'ຜູ້ຈັດການ',job:'ຕັດສິນ ລວມ / ແຍກ · ກຸ່ມດຽວກັນຢູ່ຕິດກັນ',
+      tag:true,loo:true,res:['ລວມເຂົ້າລະຫັດຫຼັກ','ແຍກ (ຄົນລະຄົນ)','ຄົນດຽວ ຫຼາຍຈຸດສົ່ງ','ເກັບໄວ້ເປັນລະຫັດຫຼັກ']},
+  q6:{name:'ຂໍ້ມູນບໍ່ຄົບ',who:'ແອັດມິນ',job:'ລູກຄ້າສັ່ງປົກກະຕິ ແຕ່ຂໍ້ມູນຂາດ · ຕື່ມໃນ "ແກ້ຂໍ້ມູນສຳລັບ LOO" ແລ້ວສົ່ງອອກເຂົ້າ LOO · ບໍ່ດ່ວນ',
+      tag:false,loo:true,res:['ແກ້ຂໍ້ມູນຄົບແລ້ວ','ໄດ້ຂໍ້ມູນບາງສ່ວນ','ສົ່ງໃຫ້ທີມສົ່ງກວດໜ້າງານ',...CALL]},
+  q7:{name:'ຜິດປົກກະຕິ',who:'ຜູ້ຈັດການ + ໄອທີ',job:'ເບີ / GPS ໃຊ້ຮ່ວມກັນ · ບັນຊີພາຍໃນ · ລະຫັດບໍ່ມີໃນລາຍຊື່',
+      tag:true,loo:true,res:['ແກ້ແລ້ວ','ສົ່ງໃຫ້ໄອທີ','ບໍ່ແມ່ນບັນຫາ']}
+};
+// a step is a real sequence: week order the team should work through
+const STEPS=[
+  {when:'ອາທິດ 1 · ແອັດມິນ / CS',what:'ໂທລູກຄ້າບໍ່ເຄື່ອນໄຫວ "ດ່ວນຫຼາຍ" ແລະ "ດ່ວນ"',why:'ລູກຄ້າສັ່ງປະຈຳທີ່ເລີ່ມຫາຍ ຖ້າໂທໄວຍັງດຶງກັບມາໄດ້',q:'q2',pr:['ດ່ວນຫຼາຍ','ດ່ວນ']},
+  {when:'ອາທິດ 1 · ແອັດມິນ / CS',what:'ໂທ 100 ລາຍທີ່ຖືຕຸກມັດຈຳສູງສຸດ ໃນລູກຄ້າບໍ່ເຄື່ອນໄຫວ',why:'ຖືມັດຈຳເກືອບເຄິ່ງໜຶ່ງຂອງທັງໝົດ ແຕ່ຫຼາຍລາຍຢູ່ລະດັບ "ຕິດຕາມ" ຈຶ່ງອາດຖືກໂທຊ້າ',q:'q2',top:100,sort:'dep'},
+  {when:'ອາທິດ 1 · ແອັດມິນ + ທີມສົ່ງ',what:'ແກ້ຂໍ້ມູນລູກຄ້າທີ່ສົ່ງຢູ່ ລະດັບ "ດ່ວນ"',why:'ລູກຄ້າຍັງສັ່ງຢູ່ ແຕ່ສາຂາ / ມື້ສົ່ງໃນລະບົບຜິດ',q:'q1',pr:['ດ່ວນ']},
+  {when:'ອາທິດ 2 · ຜູ້ຈັດການ',what:'ລູກຄ້າໃໝ່ 60 ມື້ ແລະ ລູກຄ້າຊ້ຳ',why:'ຕື່ມຂໍ້ມູນຕັ້ງແຕ່ເລີ່ມ ແລະ ຕັດສິນລະຫັດຊ້ຳກ່ອນແກ້ອັນອື່ນ',q:['q4','q5']},
+  {when:'ອາທິດ 2–3 · ແອັດມິນ',what:'ລູກຄ້າສົ່ງຢູ່ "ປານກາງ" ແລະ ບໍ່ເຄື່ອນໄຫວ ທີ່ເຫຼືອ',why:'ວຽກສ່ວນໃຫຍ່ ແບ່ງຕາມສາຂາ',q:['q1','q2'],pr:['ປານກາງ','ຕິດຕາມ']},
+  {when:'ອາທິດ 3–4 · ແອັດມິນ',what:'ຕື່ມຂໍ້ມູນທີ່ຂາດ ຂອງລູກຄ້າທີ່ສັ່ງປົກກະຕິ ແລ້ວອັບເດດເຂົ້າ LOO',why:'ກັ່ນຕອງ "ຂໍ້ມູນທີ່ຂາດ" ເຊັ່ນ ມື້ຈັດສົ່ງ ເພື່ອແບ່ງວຽກ',q:'q6'},
+  {when:'ອາທິດ 3–4 · ຜູ້ຈັດການ + ໄອທີ',what:'ອະນຸມັດປິດໃຊ້ງານ ແລະ ແກ້ລາຍການຜິດປົກກະຕິ',why:'ກວດເກັບຕຸກມັດຈຳກ່ອນປິດ (1,577 ລະຫັດຍັງຖືຕຸກ)',q:['q3','q7']}
+];
+const PRC={'ດ່ວນຫຼາຍ':'c-crit','ດ່ວນ':'c-warn','ປານກາງ':'c-mid','ຕິດຕາມ':''};
+const PRO=['ດ່ວນຫຼາຍ','ດ່ວນ','ປານກາງ','ຕິດຕາມ'];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch{return null}},set(k,v){try{localStorage.setItem(k,v)}catch{}}};
+
+let D=null, TR={}, db=null, view='ov', open=null, shown=60, rows=[], IDX=new Map();
+const R=q=>D[q].r.map(r=>({k:r[0],c:r[1],n:r[2],p:r[3],b:r[4],pr:r[5],t:r[6],g:r[7],v:r[8],q}));
+const fld=(o,l)=>o.v[D[o.q].h.indexOf(l)]||'';
+const stOf=o=>TR[o.k]?.st||'todo';
+const me=()=>$('who').value.trim();
+// identity: the claude.ai account id when the viewer is signed in, else the typed name (older records)
+let USER=null, MYID=null;
+const NAMES=new Map();
+const myK=()=>MYID||me();
+const whoOk=()=>!!myK();
+const nm=(id,fb)=>id?(NAMES.get(id)||fb||'ສະມາຊິກທີມ'):(fb||'');
+const byN=t=>nm(t?.byId,t?.by);
+const ownK=t=>t?.ownId||t?.own||'';
+const ownN=t=>nm(t?.ownId,t?.own);
+const logK=h=>h.uid||h.by||'?';
+const logN=h=>nm(h.uid,h.by)||'?';
+const keyN=k=>NAMES.has(k)?nm(k):k;   // a person key is either an account id or a typed name
+const meStamp=()=>MYID?{uid:MYID}:{by:me()};
+const ownPatch=()=>MYID?{ownId:MYID,own:''}:{own:me(),ownId:''};
+const tries=t=>logOf(t).filter(h=>h.kind!=='claim').length;
+async function resolveNames(){
+  if(!USER) return;
+  const ids=new Set();
+  for(const t of Object.values(TR)){[t.byId,t.ownId,t.fixById].forEach(x=>x&&ids.add(x));(t.log||[]).forEach(h=>h.uid&&ids.add(h.uid));}
+  const miss=[...ids].filter(x=>!NAMES.has(x));
+  if(!miss.length) return;
+  miss.forEach(x=>NAMES.set(x,''));   // ask once per id
+  try{const ps=await USER.profiles(miss);for(const x of miss) NAMES.set(x,ps[x]?.name||'');refresh();}catch{}
+}
+const ymd=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const dm=s=>s?s.slice(8,10)+'/'+s.slice(5,7):'';
+const isDue=k=>{const t=TR[k];return !!(t&&t.next&&t.st!=='done'&&t.next<=ymd(Date.now()))};
+// records saved before history existed count as one entry
+const logOf=t=>t?.log||(t?.at?[{at:t.at,by:t.by,st:t.st,res:t.res,note:t.note}]:[]);
+const LOGMAX=30;
+async function save(k,patch,entry){
+  const o=IDX.get(k), t=TR[k]||{};
+  const rec={...t,q:o.q,c:o.c,n:o.n,...patch};
+  if(entry) rec.log=[...logOf(t),entry].slice(-LOGMAX);
+  await db.collection('track').doc(k).set(rec);
+}
+
+// fields the team can correct for LOO; m = index into D.fx (the audit's missing-field flags)
+const FIXF=[
+  {f:'name',l:'ຊື່ລູກຄ້າ',m:12},{f:'phone',l:'ເບີໂທ',m:0,type:'tel'},
+  {f:'village',l:'ບ້ານ',m:1},{f:'district',l:'ເມືອງ',m:1,list:'dl-district'},
+  {f:'gps',l:'GPS (lat, lng)',m:2},{f:'branch',l:'ສາຂາ',m:3,list:'dl-branch'},
+  {f:'bottles',l:'ຕຸກມັດຈຳ (ຕຸກ)',m:5,type:'number'},{f:'behav',l:'ພຶດຕິກຳການສັ່ງ',m:7,opts:'BEHAV'},
+  {f:'prio',l:'ລຳດັບຄວາມສຳຄັນ',m:8},{f:'group',l:'ກຸ່ມລູກຄ້າ',m:9},
+  {f:'ctype',l:'ປະເພດລູກຄ້າ (ແທນ RETAIL)',m:10},{f:'days',l:'ມື້ຈັດສົ່ງ',m:6,days:true}
+];
+const DAYS=['ຈັນ','ອັງຄານ','ພຸດ','ພະຫັດ','ສຸກ','ເສົາ','ອາທິດ'];
+const BEHAV=['ສົ່ງປະຈຳທຸກອາທິດ','ສົ່ງປະຈຳ 2 ຄັ້ງ/ອາທິດ','ສົ່ງປະຈຳ 2 ອາທິດ/ຄັ້ງ','2ຄັ້ງ/ເດືອນ','ເດືອນລະຄັ້ງ','ສັ່ງເມື່ອໃກ້ໝົດ (ໂທຮຽກ)','ດົນໆເທື່ອໜື່ງ','ສັ່ງບໍ່ສະໝ່ຳສະເໝີ'];
+const missOf=o=>D.miss[o.c]||[];
+// "DRIVER: A, HELPER: B" → ["A","B"]
+const teamParts=s=>String(s||'').split(',').map(p=>p.replace(/^\s*[A-Za-z]+\s*:\s*/,'').trim()).filter(Boolean);
+let BYCODE=new Map();
+const hasFix=t=>!!t?.fix&&Object.keys(t.fix).length>0;
+const pendLoo=k=>hasFix(TR[k])&&!TR[k].loo;
+// Lao numbers: drop 856 / leading 0; 8-digit mobiles lack the 20 prefix
+function normPhone(s){
+  let d=String(s).replace(/\D/g,'');
+  if(d.startsWith('856')) d=d.slice(3);
+  if(d.startsWith('0')) d=d.slice(1);
+  if(d.length===8&&!d.startsWith('21')) d='20'+d;
+  return d;
+}
+const okPhone=d=>/^20\d{8}$|^30\d{7}$|^21\d{6}$/.test(d);
+function normGps(s){
+  const m=String(s).match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+  if(!m) return null;
+  const a=+m[1], b=+m[2];
+  return a>=13&&a<=23&&b>=100&&b<=108?`${a}, ${b}`:null;   // inside Laos
+}
+function sugParse(o){
+  const s=fld(o,'ຂໍ້ມູນແນະນຳຈາກປະຫວັດການສັ່ງ'), r={};
+  s.split(' · ').forEach(p=>{const [k,...v]=p.split(':');const x=v.join(':').trim();
+    if(k==='ພຶດຕິກຳ') r.behav=x; else if(k==='ມື້ສົ່ງ') r.days=x; else if(k==='ສາຂາ') r.branch=x; else if(k==='ເບີໃນບິນ') r.phone=x;});
+  if(!r.phone&&fld(o,'ເບີໂທໃນບິນ')) r.phone=fld(o,'ເບີໂທໃນບິນ');
+  return r;
+}
+function curOf(o,f){
+  return {name:o.n,phone:o.p,village:fld(o,'ບ້ານ'),district:fld(o,'ເມືອງ'),branch:fld(o,'ສາຂາ (ລະບົບ)'),
+    days:fld(o,'ມື້ຈັດສົ່ງ'),behav:fld(o,'ພຶດຕິກຳການສັ່ງ'),bottles:fld(o,'ຕຸກມັດຈຳ')}[f]||'';
+}
+function fixHtml(o,t,ro){
+  const ms=missOf(o), fx=t.fix||{}, k=esc(o.k), sug=sugParse(o), hasSug=Object.keys(sug).length;
+  const why=D.why[o.c];
+  const field=x=>{
+    const miss=ms.includes(x.m)?' miss':'', v=fx[x.f]||'', cur=curOf(o,x.f), ph=cur?'ປັດຈຸບັນ: '+cur:'';
+    if(x.days){const sel=v.split(',').map(s=>s.trim());
+      return `<div class="wide"><label class="${miss.trim()}" style="display:block;font-size:13px">${x.l}${cur?` <span class="asof">(ປັດຈຸບັນ: ${esc(cur)})</span>`:''}</label>
+        <div class="days">${DAYS.map(d=>`<label><input type="checkbox" name="fx_days" value="${d}"${sel.includes(d)?' checked':''}${ro}> ${d}</label>`).join('')}</div></div>`;}
+    if(x.opts) return `<label class="${miss.trim()}">${x.l}<select name="fx_${x.f}" id="fx-${k}-${x.f}"${ro}><option value="">${esc(ph||'— ບໍ່ປ່ຽນ —')}</option>${BEHAV.map(b=>`<option${b===v?' selected':''}>${esc(b)}</option>`).join('')}</select></label>`;
+    return `<label class="${miss.trim()}">${x.l}<input name="fx_${x.f}" id="fx-${k}-${x.f}" type="${x.type||'text'}"${x.type==='number'?' min="0" max="999" step="1"':''}${x.list?` list="${x.list}"`:''} value="${esc(v)}" placeholder="${esc(ph)}"${ro}></label>`;
+  };
+  return `<details class="fix"${ms.length||hasFix(t)?' open':''}><summary>ແກ້ຂໍ້ມູນສຳລັບ LOO${ms.length?` · <span style="color:var(--crit)">ຂາດ ${ms.length}</span>`:''}${hasFix(t)?` · <span class="chip ${t.loo?'c-ok':'c-warn'}">${t.loo?'ເຂົ້າ LOO ແລ້ວ':'ລໍຖ້າເຂົ້າ LOO'}</span>`:''}</summary>
+    <p class="asof" style="margin:0 0 8px">ໃສ່ສະເພາະຊ່ອງທີ່ຕ້ອງປ່ຽນ ຊ່ອງວ່າງ = ບໍ່ປ່ຽນ · ສີແດງ = ຂາດ ຫຼື ບໍ່ຖືກ ຕາມການກວດ${why?` · ຊື່: ${esc(why)}`:''}${ms.includes(11)?' · ຮູບ: ຖ່າຍໃສ່ LOO ໂດຍກົງ':''}</p>
+    ${hasSug?`<p style="margin:0 0 8px"><button type="button" data-sug${ro}>ໃຊ້ຂໍ້ມູນແນະນຳ</button> <span class="asof">${esc(Object.values(sug).join(' · '))} · ຢືນຢັນກັບລູກຄ້າກ່ອນບັນທຶກ</span></p>`:''}
+    <div class="fixg">${FIXF.map(field).join('')}</div>
+  </details>`;
+}
+// returns {fix} or {err}
+function readFix(f){
+  const el=f.elements, fix={};
+  for(const x of FIXF){
+    let v=x.days?[...f.querySelectorAll('input[name="fx_days"]:checked')].map(c=>c.value).join(', '):(el['fx_'+x.f]?.value||'').trim();
+    if(!v) continue;
+    if(x.f==='phone'){v=normPhone(v);if(!okPhone(v)) return {err:'ເບີໂທບໍ່ຖືກ: ຕ້ອງເປັນ 20xxxxxxxx / 30xxxxxxx / 21xxxxxx'};}
+    if(x.f==='gps'){v=normGps(v);if(!v) return {err:'GPS ບໍ່ຖືກ: ໃສ່ແບບ 17.97, 102.63 (ຢູ່ໃນລາວ)'};}
+    if(x.f==='bottles'&&!/^\d{1,3}$/.test(v)) return {err:'ຕຸກມັດຈຳຕ້ອງເປັນຕົວເລກ 0–999'};
+    fix[x.f]=v;
+  }
+  return {fix};
+}
+
+$('who').value=store.get('who')||'';
+$('who').addEventListener('change',e=>store.set('who',e.target.value.trim()));
+
+function tabs(){
+  const t=[['ov','ພາບລວມ',null],['rp','ລາຍງານຜົນ',null],['lg','ການເຄື່ອນໄຫວ',null],['gd','ຄູ່ມື',null],...Object.keys(CFG).map(q=>[q,CFG[q].name,q])];
+  $('tabs').innerHTML=t.map(([id,l,q])=>{
+    const n=q?D[q].r.filter(r=>(TR[r[0]]?.st||'todo')!=='done').length:'';
+    return `<button role="tab" aria-selected="${view===id}" data-v="${id}">${esc(l)}${q?`<span class="n">${n}</span>`:''}</button>`}).join('');
+}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)});
+
+function go(v,pre){
+  view=v;open=null;shown=60;
+  try{history.replaceState(null,'','#'+v)}catch{}
+  $('ov').hidden=v!=='ov';$('rp').hidden=v!=='rp';$('lg').hidden=v!=='lg';$('gd').hidden=v!=='gd';$('qv').hidden=!CFG[v];
+  if(v==='ov') overview(); else if(v==='rp') report(); else if(v==='lg') activity(); else if(CFG[v]) setupQueue(v,pre);
+  tabs();window.scrollTo(0,0);
+}
+
+function progOf(list){
+  const d=list.filter(o=>stOf(o)==='done').length, g=list.filter(o=>stOf(o)==='doing').length;
+  return {d,g,n:list.length};
+}
+function bar(p){
+  const pd=p.n?p.d/p.n*100:0, pg=p.n?p.g/p.n*100:0;
+  return `<div class="prog"><div class="bar"><i class="d" style="width:${pd}%"></i><i class="g" style="width:${pg}%"></i></div><span class="mono">${p.d}/${p.n}</span></div>`;
+}
+function stepRows(s){
+  const qs=[].concat(s.q);
+  const r=qs.flatMap(q=>R(q)).filter(o=>!s.pr||s.pr.includes(o.pr));
+  return s.top?sortRows(r,s.sort).slice(0,s.top):r;
+}
+// sort keys: label shown, field read; rows without the field keep file order
+const SORTS={dep:['ມັດຈຳສູງສຸດ','ມັດຈຳລວມ (ກີບ)'],gone:['ບໍ່ສັ່ງມາດົນສຸດ','ບໍ່ສັ່ງມາ (ມື້)'],
+  bills:['ບິນ 2026 ຫຼາຍສຸດ','ບິນ 2026'],b90:['ບິນ 90 ມື້ ຫຼາຍສຸດ','ບິນ 90 ມື້']};
+const numOf=(o,l)=>Number(String(fld(o,l)).replace(/,/g,''))||0;
+function sortRows(r,key){
+  if(!SORTS[key]) return r;
+  const l=SORTS[key][1];
+  return r.map((o,i)=>[o,numOf(o,l),i]).sort((a,b)=>b[1]-a[1]||a[2]-b[2]).map(x=>x[0]);
+}
+
+function overview(){
+  const steps=STEPS.map((s,i)=>`<li><button class="step" data-i="${i}">
+      <span class="num">${i+1}</span><span class="when">${esc(s.when)}</span>
+      <span><b>${esc(s.what)}</b> · <span class="asof">${esc(s.why)}</span></span>
+      ${bar(progOf(stepRows(s)))}</button></li>`).join('');
+  // a customer in several lists counts once: done only when every list is done
+  const tot={d:0,g:0,n:BYCODE.size};
+  for(const os of BYCODE.values()){const s=os.map(stOf);
+    if(s.every(x=>x==='done')) tot.d++; else if(s.some(x=>x!=='todo')) tot.g++;}
+  const by={};
+  for(const q of ['q1','q2','q4']) for(const o of R(q)){
+    const b=by[o.b]??={b:o.b,q1:0,q2:0,q4:0,d:0,n:0};
+    b.n++; if(stOf(o)==='done') b.d++; else b[q]++;
+  }
+  const dueQ=Object.keys(CFG).map(q=>{
+    const d=Object.entries(TR).filter(([k,t])=>t.q===q&&isDue(k));
+    return [q,d.length,d.filter(([,t])=>ownK(t)&&ownK(t)===myK()).length];
+  }).filter(x=>x[1]);
+  const br=Object.values(by).sort((a,b)=>(b.q1+b.q2+b.q4)-(a.q1+a.q2+a.q4));
+  $('ov').innerHTML=`
+    <h2>ເລີ່ມແຕ່ບ່ອນໃດ</h2>
+    <p class="sub">ເຮັດຕາມລຳດັບ 1→${STEPS.length} · ກົດແຕ່ລະຂັ້ນເພື່ອເປີດລາຍຊື່ທີ່ຕ້ອງເຮັດ · ສີຂຽວ = ສຳເລັດ, ສີສົ້ມ = ກຳລັງຕິດຕາມ</p>
+    <div class="grid2">
+      <div class="card"><ol class="steps">${steps}</ol></div>
+      <div style="display:grid;gap:20px;align-content:start;min-width:0">
+        <div class="card"><h2>ມື້ນີ້ຕ້ອງຕິດຕາມ</h2>
+          <p class="sub" style="margin-bottom:10px">ລູກຄ້າທີ່ນັດໂທຄືນ / ນັດກວດ ຮອດກຳນົດ ຫຼື ເລີຍກຳນົດແລ້ວ</p>
+          ${dueQ.length?`<div class="due">${dueQ.map(([q,n,m])=>`<button type="button" data-due="${q}"><span>${esc(CFG[q].name)}${m?` <span class="asof">· ຂອງຂ້ອຍ ${m}</span>`:''}</span><b class="chip c-crit">${n}</b></button>`).join('')}</div>`
+          :`<p class="asof" style="margin:0">ບໍ່ມີນັດຄ້າງ · ເມື່ອບັນທຶກ "ໂທບໍ່ຕິດ" ລະບົບຈະນັດໂທຄືນມື້ອື່ນໃຫ້</p>`}</div>
+        <div class="card"><h2>ຄວາມຄືບໜ້າລວມ</h2><p class="sub" style="margin-bottom:8px">ນັບລູກຄ້າ ບໍ່ນັບຊ້ຳ · ສຳເລັດ = ທຸກແຖບທີ່ລູກຄ້າຢູ່ສຳເລັດໝົດ</p>${bar(tot)}
+          <p class="sub" style="margin:8px 0 0">ກຳລັງຕິດຕາມ ${tot.g} · ຍັງບໍ່ໄດ້ເຮັດ ${tot.n-tot.d-tot.g} · ຂໍ້ມູນແກ້ລໍຖ້າເຂົ້າ LOO ${Object.keys(TR).filter(pendLoo).length}</p></div>
+        <div class="card"><h2>ຈັງຫວະການເຮັດວຽກ</h2>
+          <ul class="rhythm">
+            <li><b>ທຸກມື້ (ແອັດມິນ):</b> ເລືອກແຖບ → ກັ່ນຕອງສາຂາ → ໂທ → ບັນທຶກຜົນທັນທີ</li>
+            <li><b>ຮອບສົ່ງ (ທີມສົ່ງ):</b> ເປີດ "ສົ່ງຢູ່ ບໍ່ໄດ້ອັບເດດ" ກັ່ນຕອງທີມຕົນເອງ · ປັກ GPS ນັບຕຸກ ຖ່າຍຮູບ</li>
+            <li><b>ທ້າຍອາທິດ (ຜູ້ຈັດການ):</b> ເບິ່ງຕາຕະລາງສາຂາດ້ານລຸ່ມ · ສົ່ງອອກ CSV ເພື່ອແກ້ໃນ LOO ແລ້ວໝາຍ "ອັບເດດໃນ LOO ແລ້ວ"</li>
+          </ul></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <h2>ວຽກຄ້າງຕາມສາຂາ</h2>
+      <p class="sub">ນັບລາຍການທີ່ຍັງບໍ່ສຳເລັດ · ສົ່ງຢູ່ ບໍ່ໄດ້ອັບເດດ / ບໍ່ເຄື່ອນໄຫວ / ລູກຄ້າໃໝ່</p>
+      <div class="tblw"><table><thead><tr><th>ສາຂາ</th><th class="r">ສົ່ງຢູ່ ບໍ່ອັບເດດ</th><th class="r">ບໍ່ເຄື່ອນໄຫວ</th><th class="r">ລູກຄ້າໃໝ່</th><th class="r">ຄ້າງລວມ</th><th style="min-width:140px">ສຳເລັດ</th></tr></thead>
+      <tbody>${br.map(b=>`<tr><td>${esc(b.b)}</td><td class="r">${b.q1}</td><td class="r">${b.q2}</td><td class="r">${b.q4}</td><td class="r"><b>${b.q1+b.q2+b.q4}</b></td><td>${bar({d:b.d,g:0,n:b.n})}</td></tr>`).join('')}</tbody></table></div>
+    </div>`;
+}
+$('ov').addEventListener('click',e=>{
+  const d=e.target.closest('[data-due]'); if(d){go(d.dataset.due,{st:'due'});return;}
+  const b=e.target.closest('.step'); if(!b) return;
+  const s=STEPS[b.dataset.i], q=[].concat(s.q)[0];
+  go(q,{pr:s.pr&&s.pr.length===1?s.pr[0]:'',sort:s.sort});
+});
+
+function opts(sel,label,vals,cur){
+  sel.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option${v===cur?' selected':''}>${esc(v)}</option>`).join('');
+  sel.hidden=vals.length<2;
+}
+function setupQueue(q,pre={}){
+  const c=CFG[q]; rows=R(q);
+  $('qt').textContent=c.name+' · '+rows.length.toLocaleString()+' ລາຍ';
+  $('qs').textContent=c.who+' — '+c.job;
+  $('fq').value='';
+  const uniq=f=>[...new Set(rows.map(f).filter(Boolean))];
+  opts($('fb'),'ທຸກສາຂາ',uniq(o=>o.b).sort(),'');
+  opts($('fp'),'ທຸກຄວາມສຳຄັນ',PRO.filter(p=>rows.some(o=>o.pr===p)),pre.pr||'');
+  if(c.x){
+    // one option per team or person, busiest first, so a driver finds every route they rode on
+    const cnt={};rows.forEach(o=>teamParts(fld(o,c.x)).forEach(n=>cnt[n]=(cnt[n]||0)+1));
+    $('fx').innerHTML=`<option value="">ທຸກທີມ / ຄົນສົ່ງ</option>`+Object.entries(cnt).sort((a,b)=>b[1]-a[1])
+      .map(([n,k])=>`<option value="${esc(n)}">${esc(n)} (${k})</option>`).join('');
+    $('fx').hidden=false;
+  } else opts($('fx'),'ທຸກປະເພດ',c.tag?uniq(o=>o.t):[],'');
+  const mc=D.fx.map((l,i)=>[i,l,rows.filter(o=>missOf(o).includes(i)).length]).filter(x=>x[2]);
+  $('fm').innerHTML=`<option value="">ທຸກຂໍ້ມູນທີ່ຂາດ</option><option value="any">ຂາດຢ່າງໜ້ອຍ 1 ຢ່າງ</option>`+mc.map(([i,l,n])=>`<option value="${i}">ຂາດ: ${esc(l)} (${n})</option>`).join('');
+  $('fm').value=pre.miss??'';$('fm').hidden=!mc.length;
+  const sk=Object.keys(SORTS).filter(k=>D[q].h.includes(SORTS[k][1]));
+  $('fsort').innerHTML=`<option value="">ຮຽງຕາມຄວາມສຳຄັນ</option>`+sk.map(k=>`<option value="${k}">ຮຽງ: ${SORTS[k][0]}</option>`).join('');
+  $('fsort').value=sk.includes(pre.sort)?pre.sort:'';$('fsort').hidden=!sk.length;
+  $('fs').innerHTML=`<option value="">ທຸກສະຖານະ</option><option value="open">ຍັງບໍ່ສຳເລັດ</option><option value="due">ນັດຮອດກຳນົດ (ມື້ນີ້ + ເລີຍກຳນົດ)</option><option value="fix">ແກ້ຂໍ້ມູນແລ້ວ ລໍຖ້າເຂົ້າ LOO</option>`+Object.entries(ST).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  $('fs').value=pre.st||'open';
+  ownerOpts(pre.own||'');
+  list();
+}
+function ownerOpts(cur){
+  const keys=[...new Set(rows.map(o=>ownK(TR[o.k])).filter(Boolean))].sort((a,b)=>keyN(a).localeCompare(keyN(b)));
+  $('fo').innerHTML=`<option value="">ທຸກຜູ້ຮັບວຽກ</option><option value="mine">ວຽກຂອງຂ້ອຍ</option><option value="free">ຍັງບໍ່ມີຜູ້ຮັບ</option>`
+    +keys.map(k=>`<option value="@${esc(k)}">${esc(keyN(k))}</option>`).join('');
+  $('fo').value=cur;
+  if($('fo').value!==cur) $('fo').value='';
+}
+['fq','fb','fp','fx','fs','fo','fm','fsort'].forEach(id=>$(id).addEventListener('input',()=>{shown=60;open=null;list()}));
+
+function filtered(){
+  const c=CFG[view], s=$('fq').value.trim().toLowerCase(), b=$('fb').value, p=$('fp').value, x=$('fx').value, st=$('fs').value, ow=$('fo').value, fm=$('fm').value;
+  const mine=myK();
+  return sortRows(rows.filter(o=>{
+    const own=ownK(TR[o.k]);
+    return (!b||o.b===b)&&(!p||o.pr===p)&&(!x||(c.x?teamParts(fld(o,c.x)).includes(x):o.t===x))
+      &&(!fm||(fm==='any'?missOf(o).length>0:missOf(o).includes(+fm)))
+      &&(!st||(st==='open'?stOf(o)!=='done':st==='due'?isDue(o.k):st==='fix'?pendLoo(o.k):stOf(o)===st))
+      &&(!ow||(ow==='mine'?own&&own===mine:ow==='free'?!own:own===ow.slice(1)))
+      &&(!s||(o.n+' '+o.p+' '+o.c).toLowerCase().includes(s));
+  }),$('fsort').value);
+}
+function chip(o){
+  if(o.pr) return `<span class="chip ${PRC[o.pr]||''}">${esc(o.pr)}</span>`;
+  return `<span class="chip">${esc(o.t)}</span>`;
+}
+function stChip(o){
+  const s=stOf(o), cls={todo:'',doing:'c-warn',done:'c-ok'}[s], t=TR[o.k];
+  const nx=t?.next&&s!=='done'?`<span class="chip ${isDue(o.k)?'c-crit':''}">ນັດ ${dm(t.next)}</span> `:'';
+  return `<span>${nx}<span class="chip st ${cls}">${ST[s]}</span></span>`;
+}
+function list(){
+  const f=filtered();
+  $('cnt').textContent=`ສະແດງ ${Math.min(shown,f.length).toLocaleString()} ຈາກ ${f.length.toLocaleString()} ລາຍ`;
+  $('list').innerHTML=f.length?f.slice(0,shown).map(rowHtml).join(''):`<div class="empty">ບໍ່ມີລາຍການທີ່ກົງກັບການກັ່ນຕອງ</div>`;
+  $('more').hidden=f.length<=shown;
+}
+function rowHtml(o){
+  const t=TR[o.k], c=CFG[o.q];
+  const n=tries(t);
+  const dep=numOf(o,'ມັດຈຳລວມ (ກີບ)');
+  const sub=[o.c,o.p,o.b,o.g?'ກຸ່ມ '+o.g:'',o.pr&&o.q!=='q1'?o.t:'',dep?'ມັດຈຳ '+Math.round(dep).toLocaleString()+' ກີບ':'',c.x?fld(o,c.x):'',t?.res||'',
+    n?`ຕິດຕາມ ${n} ຄັ້ງ`:'',ownK(t)?'ຜູ້ຮັບວຽກ: '+ownN(t):''].filter(Boolean);
+  return `<div class="row" data-k="${esc(o.k)}">
+    <button class="rh" aria-expanded="${open===o.k}">${chip(o)}<span class="nm">${esc(o.n)}</span>${stChip(o)}
+      <span class="meta">${sub.map(s=>`<span>${esc(s)}</span>`).join('')}</span></button>
+    ${open===o.k?detail(o):''}</div>`;
+}
+function detail(o){
+  const c=CFG[o.q], t=TR[o.k]||{}, h=D[o.q].h, s=t.st||'todo';
+  const ro=!db?' disabled':'';
+  return `<div class="det">
+    <dl><dt>ລະຫັດ</dt><dd class="mono">${esc(o.c)}</dd><dt>ເບີໂທ</dt><dd class="mono">${esc(o.p)}</dd>
+      ${h.map((l,i)=>o.v[i]?`<dt>${esc(l)}</dt><dd>${esc(o.v[i])}</dd>`:'').join('')}</dl>
+    <form class="form" data-k="${esc(o.k)}">
+      ${(()=>{const ot=(BYCODE.get(o.c)||[]).filter(x=>x.k!==o.k);
+        return ot.length?`<div class="ownl"><span class="warn">ລູກຄ້ານີ້ຢູ່ໃນແຖບອື່ນນຳ:</span>${ot.map(x=>`<button type="button" data-jump="${esc(x.q)}" data-code="${esc(o.c)}">${esc(CFG[x.q].name)} · ${ST[stOf(x)]}</button>`).join('')}</div>`:'';})()}
+      <div class="ownl">${ownK(t)
+        ?`ຜູ້ຮັບວຽກ: <b>${esc(ownN(t))}</b>${myK()&&ownK(t)!==myK()?' <span class="warn">· ຄົນອື່ນຮັບແລ້ວ ກວດກ່ອນໂທ</span>':''}`
+        :'ຍັງບໍ່ມີຜູ້ຮັບວຽກ'}
+        ${ownK(t)!==myK()||!ownK(t)?`<button type="button" data-claim${ro}>ຮັບວຽກນີ້</button>`:''}</div>
+      <div class="seg" role="group" aria-label="ສະຖານະ">${Object.entries(ST).map(([k,v])=>`<button type="button" data-st="${k}" aria-pressed="${k===s}"${ro}>${v}</button>`).join('')}</div>
+      <label>ຜົນ<select id="res-${esc(o.k)}" name="res"${ro}><option value="">— ເລືອກ —</option>${c.res.map(r=>`<option${r===t.res?' selected':''}>${esc(r)}</option>`).join('')}</select></label>
+      <label>ບັນທຶກ (ຂໍ້ມູນໃໝ່ທີ່ໄດ້ ເຊັ່ນ ມື້ສົ່ງ ເບີໃໝ່ ເຫດຜົນ)<textarea id="note-${esc(o.k)}" name="note"${ro}>${esc(t.note||'')}</textarea></label>
+      ${fixHtml(o,t,ro)}
+      <label>ນັດໂທຄືນ / ນັດກວດ / ນັດເກັບຕຸກ<input type="date" id="next-${esc(o.k)}" name="next" value="${esc(t.next||'')}"${ro}></label>
+      ${c.loo?`<label class="chk"><input type="checkbox" id="loo-${esc(o.k)}" name="loo"${t.loo?' checked':''}${ro}> ອັບເດດໃນ LOO ແລ້ວ</label>`:''}
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="pri" type="submit"${ro}>ບັນທຶກ</button>
+        <span class="saved">${t.at?`ລ່າສຸດ: ${esc(byN(t))} · ${esc(fmtT(t.at))}`:''}</span>
+      </div>
+      ${logOf(t).length?`<ul class="hist" aria-label="ປະຫວັດການຕິດຕາມ">${logOf(t).slice().reverse().map(h=>`<li>
+        <span class="when">${esc(fmtT(h.at))} · ${esc(logN(h))}</span>
+        <span>${h.kind==='claim'?'ຮັບວຽກ':esc(ST[h.st]||'')}${h.res?' · '+esc(h.res):''}${h.note?' — '+esc(h.note):''}</span></li>`).join('')}</ul>`:''}
+    </form></div>`;
+}
+const fmtT=ms=>ms?new Date(ms).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+
+$('list').addEventListener('click',e=>{
+  const seg=e.target.closest('.seg button');
+  if(seg){seg.parentElement.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b===seg));return;}
+  const jp=e.target.closest('[data-jump]');
+  if(jp){jumpTo(jp.dataset.jump,jp.dataset.code);return;}
+  const cl=e.target.closest('[data-claim]');
+  if(cl){claim(cl.closest('form'));return;}
+  const sg=e.target.closest('[data-sug]');
+  if(sg){
+    const f=sg.closest('form'), s=sugParse(IDX.get(f.dataset.k)), el=f.elements;
+    if(s.behav&&BEHAV.includes(s.behav)) el.fx_behav.value=s.behav;
+    if(s.branch) el.fx_branch.value=s.branch;
+    if(s.phone) el.fx_phone.value=s.phone;
+    if(s.days){const ds=s.days.split(',').map(x=>x.trim());f.querySelectorAll('input[name="fx_days"]').forEach(c=>c.checked=ds.includes(c.value));}
+    return;
+  }
+  const h=e.target.closest('.rh'); if(!h) return;
+  const k=h.parentElement.dataset.k; open=open===k?null:k; list();
+});
+$('list').addEventListener('change',e=>{
+  // picking a result moves an untouched item to "in progress"
+  if(e.target.name!=='res'||!e.target.value) return;
+  const f=e.target.closest('form'), seg=f.querySelector('.seg');
+  // no answer: suggest calling back tomorrow unless a date is already set
+  const nx=f.elements.next;
+  if(CALL.includes(e.target.value)&&!nx.value) nx.value=ymd(Date.now()+DAY);
+  if(seg.querySelector('[aria-pressed="true"]').dataset.st==='todo')
+    seg.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st==='doing'));
+});
+$('list').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const f=e.target, k=f.dataset.k, msg=f.querySelector('.saved');
+  if(!whoOk()){msg.textContent='ກະລຸນາໃສ່ຊື່ຜູ້ເຮັດດ້ານເທິງກ່ອນ';$('who').focus();return;}
+  const at=Date.now(), st=f.querySelector('.seg [aria-pressed="true"]').dataset.st;
+  const el=f.elements, rf=readFix(f);
+  if(rf.err){msg.textContent=rf.err;msg.classList.add('ferr');return;}
+  msg.classList.remove('ferr');
+  const old=TR[k]?.fix||{}, changed=JSON.stringify(rf.fix)!==JSON.stringify(old);
+  const stamp=MYID?{byId:MYID,by:''}:{by:me(),byId:''};
+  const patch={st,res:el.res.value,note:el.note.value.trim(),loo:!!el.loo?.checked,next:el.next.value,at,...stamp,
+    ...(ownK(TR[k])?{}:ownPatch()),fix:rf.fix};
+  // edited data must go into LOO again, so a change clears the LOO tick unless it is ticked in this save
+  if(changed){patch.fixAt=at;Object.assign(patch,MYID?{fixById:MYID,fixBy:''}:{fixBy:me(),fixById:''});if(TR[k]?.loo&&el.loo?.checked) patch.loo=false;}
+  const fixNote=changed&&Object.keys(rf.fix).length?'ແກ້ຂໍ້ມູນ: '+FIXF.filter(x=>rf.fix[x.f]).map(x=>x.l).join(', '):'';
+  msg.textContent='ກຳລັງບັນທຶກ…';
+  // redraw after save: the snapshot refresh skips while focus is still inside the form
+  try{await save(k,patch,{at,...meStamp(),st,res:patch.res,note:[patch.note,fixNote].filter(Boolean).join(' · ')});document.activeElement?.blur();refresh();}
+  catch(err){msg.textContent='ບັນທຶກບໍ່ສຳເລັດ: '+(err.code==='permission_denied'?'ບໍ່ມີສິດແກ້ໄຂ ຂໍສິດຈາກເຈົ້າຂອງ':err.message||err.code);}
+});
+$('more').addEventListener('click',()=>{shown+=60;list()});
+function jumpTo(q,code){
+  go(q,{st:''});$('fs').value='';$('fq').value=code;
+  const hit=rows.find(r=>r.c===code);open=hit?hit.k:null;list();
+}
+
+let lgP='7', lgW='', lgQ='', lgShown=100;
+function activity(){
+  const from=lgP==='all'?0:day0(Date.now())-(Number(lgP)-1)*DAY;
+  const all=Object.entries(TR).flatMap(([k,t])=>logOf(t).map(h=>({...h,k,t})));
+  const ppl=new Map();all.forEach(h=>ppl.set(logK(h),logN(h)));
+  const ev=all.filter(h=>(h.at||0)>=from&&(!lgW||logK(h)===lgW)&&(!lgQ||h.t.q===lgQ)).sort((a,b)=>b.at-a.at);
+  const P={'1':'ມື້ນີ້','7':'7 ມື້','30':'30 ມື້','all':'ທັງໝົດ'};
+  const act=h=>h.kind==='claim'?'ຮັບວຽກ':[ST[h.st],h.res].filter(Boolean).join(' · ');
+  $('lg').innerHTML=`
+    <div class="rptop"><div><h2>ບັນທຶກການເຄື່ອນໄຫວ</h2>
+      <p class="sub" style="margin:0">ທຸກການບັນທຶກ ແລະ ການຮັບວຽກຂອງທີມ ລຽງຈາກລ່າສຸດ · ຊື່ມາຈາກບັນຊີ claude.ai ຂອງຜູ້ບັນທຶກ</p></div>
+      <div class="seg" role="group" aria-label="ຊ່ວງເວລາ">${Object.entries(P).map(([k,v])=>`<button type="button" data-lp="${k}" aria-pressed="${k===lgP}">${v}</button>`).join('')}</div></div>
+    <div class="filters">
+      <select id="lgw" aria-label="ຜູ້ເຮັດ"><option value="">ທຸກຄົນ</option>${[...ppl].sort((a,b)=>a[1].localeCompare(b[1])).map(([k,n])=>`<option value="${esc(k)}"${k===lgW?' selected':''}>${esc(n)}</option>`).join('')}</select>
+      <select id="lgq" aria-label="ແຖບ"><option value="">ທຸກແຖບ</option>${Object.keys(CFG).map(q=>`<option value="${q}"${q===lgQ?' selected':''}>${esc(CFG[q].name)}</option>`).join('')}</select>
+    </div>
+    <div class="count">${ev.length.toLocaleString()} ລາຍການ · ${new Set(ev.map(logK)).size} ຄົນ · ${new Set(ev.map(h=>h.k)).size} ລູກຄ້າ</div>
+    ${ev.length?`<div class="card" style="padding:0"><div class="tblw"><table><thead><tr><th>ເວລາ</th><th>ຜູ້ເຮັດ</th><th>ລູກຄ້າ</th><th>ແຖບ</th><th>ການກະທຳ</th><th>ບັນທຶກ</th></tr></thead><tbody>
+      ${ev.slice(0,lgShown).map(h=>`<tr><td class="mono">${esc(fmtT(h.at))}</td><td>${esc(logN(h))}</td>
+        <td><button type="button" class="lnk" data-jump="${esc(h.t.q)}" data-code="${esc(h.t.c)}">${esc(h.t.n)}</button><div class="asof mono">${esc(h.t.c)}</div></td>
+        <td>${esc(CFG[h.t.q]?.name||'')}</td><td>${esc(act(h))}</td><td class="wr">${esc(h.note||'')}</td></tr>`).join('')}
+    </tbody></table></div></div>
+    ${ev.length>lgShown?`<button class="more" type="button" data-lmore>ສະແດງເພີ່ມ</button>`:''}`
+    :`<div class="empty">ຍັງບໍ່ມີການເຄື່ອນໄຫວໃນຊ່ວງນີ້ · ເມື່ອທີມບັນທຶກຜົນ ຫຼື ຮັບວຽກ ຈະສະແດງຢູ່ນີ້</div>`}`;
+}
+$('lg').addEventListener('click',e=>{
+  const p=e.target.closest('[data-lp]');if(p){lgP=p.dataset.lp;lgShown=100;activity();return;}
+  if(e.target.closest('[data-lmore]')){lgShown+=100;activity();return;}
+  const j=e.target.closest('[data-jump]');if(j) jumpTo(j.dataset.jump,j.dataset.code);
+});
+$('lg').addEventListener('change',e=>{
+  if(e.target.id==='lgw') lgW=e.target.value; else if(e.target.id==='lgq') lgQ=e.target.value; else return;
+  lgShown=100;activity();
+});
+
+async function claim(f){
+  const k=f.dataset.k, msg=f.querySelector('.saved');
+  if(!whoOk()){msg.textContent='ກະລຸນາໃສ່ຊື່ຜູ້ເຮັດດ້ານເທິງກ່ອນ';$('who').focus();return;}
+  const at=Date.now();
+  try{await save(k,{...ownPatch(),ownAt:at},{at,kind:'claim',...meStamp()});document.activeElement?.blur();refresh();}
+  catch(err){msg.textContent='ຮັບວຽກບໍ່ສຳເລັດ: '+(err.message||err.code);}
+}
+$('claimN').addEventListener('click',async()=>{
+  const m=$('claimMsg');
+  if(!whoOk()){m.textContent='ກະລຸນາໃສ່ຊື່ຜູ້ເຮັດດ້ານເທິງກ່ອນ';$('who').focus();return;}
+  if(!db){m.textContent='ຕ້ອງເຂົ້າສູ່ລະບົບກ່ອນ';return;}
+  const pick=filtered().filter(o=>!ownK(TR[o.k])&&stOf(o)!=='done').slice(0,20);
+  if(!pick.length){m.textContent='ບໍ່ມີລາຍການທີ່ຍັງບໍ່ມີຜູ້ຮັບໃນລາຍຊື່ນີ້';return;}
+  $('claimN').disabled=true;let n=0;
+  for(const o of pick){m.textContent=`ກຳລັງຮັບ ${++n}/${pick.length}…`;
+    const at=Date.now();
+    try{await save(o.k,{...ownPatch(),ownAt:at},{at,kind:'claim',...meStamp()});}catch(err){m.textContent='ຢຸດ: '+(err.message||err.code);break;}}
+  $('claimN').disabled=false;
+  if(n===pick.length) m.textContent=`ຮັບແລ້ວ ${n} ລາຍການ`;
+  $('fo').value='mine';shown=60;open=null;list();
+});
+
+function refresh(){
+  tabs();
+  if(view==='ov') overview();
+  else if(view==='rp') report();
+  else if(view==='lg'){ if(!$('lg').contains(document.activeElement)||document.activeElement.tagName!=='SELECT') activity(); }
+  else if(CFG[view]){
+    ownerOpts($('fo').value);
+    // keep a half-typed note: only redraw the list when no field in it has focus
+    if(!document.activeElement?.closest('.det')) list();
+  }
+}
+
+let rpP='7', rpQ='q2';
+const DAY=864e5, day0=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime()};
+const kip=s=>Number(String(s||'').replace(/,/g,''))||0;
+function report(){
+  const now=Date.now(), from=rpP==='all'?0:day0(now)-(Number(rpP)-1)*DAY;
+  const tr=Object.entries(TR).map(([k,t])=>({k,...t}));
+  // claim-only records have no save time yet
+  const inP=tr.filter(t=>t.at&&t.at>=from);
+  const q3=new Map(R('q3').map(o=>[o.k,o]));
+  const back=inP.filter(t=>t.q==='q3'&&t.res==='ເກັບຕຸກ / ຄືນມັດຈຳແລ້ວ');
+  const backKip=back.reduce((s,t)=>s+kip(q3.get(t.k)&&fld(q3.get(t.k),'ມັດຈຳລວມ (ກີບ)')),0);
+  const cnt=(f)=>inP.filter(f).length;
+  // every save is one log entry: calls, visits and decisions
+  const ev=tr.flatMap(t=>logOf(t).filter(h=>h.kind!=='claim').map(h=>({...h,k:t.k})));
+  const evP=ev.filter(h=>(h.at||0)>=from);
+  const dueN=tr.filter(t=>isDue(t.k)).length;
+  const tiles=[
+    ['ຈຳນວນຄັ້ງທີ່ຕິດຕາມ',evP.length,'ທຸກການບັນທຶກ (ໂທ ກວດ ຕັດສິນ)'],
+    ['ລູກຄ້າທີ່ຕິດຕາມແລ້ວ',inP.length,'ນັບລູກຄ້າບໍ່ຊ້ຳ'],
+    ['ນັດຮອດກຳນົດ',dueN,'ມື້ນີ້ + ເລີຍກຳນົດ ຍັງບໍ່ສຳເລັດ'],
+    ['ຂໍ້ມູນແກ້ ລໍຖ້າເຂົ້າ LOO',Object.keys(TR).filter(pendLoo).length,'ກົດ "ສົ່ງອອກຂໍ້ມູນແກ້ → LOO"'],
+    ['ສຳເລັດ',cnt(t=>t.st==='done'),'ສະຖານະ "ສຳເລັດ"'],
+    ['ອັບເດດໃນ LOO ແລ້ວ',cnt(t=>t.loo),'ແກ້ໃນລະບົບແລ້ວ'],
+    ['ລູກຄ້າຈະສັ່ງຄືນ',cnt(t=>t.q==='q2'&&t.res==='ຈະສັ່ງຄືນ'),'ຈາກແຖບບໍ່ເຄື່ອນໄຫວ'],
+    ['ເກັບຕຸກ / ຄືນມັດຈຳແລ້ວ',back.length,backKip?backKip.toLocaleString()+' ກີບ':'ລະຫັດ'],
+    ['ໂທບໍ່ຕິດ / ເບີຜິດ',cnt(t=>CALL.includes(t.res)),'ຕ້ອງໂທຄືນ ຫຼື ໃຫ້ທີມສົ່ງກວດ'],
+  ];
+  const days=[...Array(14)].map((_,i)=>day0(now)-(13-i)*DAY);
+  const per=days.map(d=>ev.filter(h=>h.at>=d&&h.at<d+DAY).length);
+  const mx=Math.max(1,...per), top=per.indexOf(Math.max(...per));
+  const dl=d=>new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit'});
+  const qp=Object.keys(CFG).map(q=>{const p=progOf(R(q));return{q,...p}});
+  const rq=inP.filter(t=>t.q===rpQ&&t.res), rc={};
+  rq.forEach(t=>rc[t.res]=(rc[t.res]||0)+1);
+  const rs=CFG[rpQ].res.map(r=>[r,rc[r]||0]), rmx=Math.max(1,...rs.map(r=>r[1]));
+  const ppl={}, P0=(k,name)=>ppl[k]??={name,n:0,d:0,own:0,due:0,last:0};
+  evP.forEach(h=>{const p=P0(logK(h),logN(h));p.n++;if(h.st==='done')p.d++;p.last=Math.max(p.last,h.at||0)});
+  tr.forEach(t=>{if(ownK(t)&&t.st!=='done'){const p=P0(ownK(t),ownN(t));p.own++;if(isDue(t.k))p.due++;}});
+  const pl=Object.values(ppl).map(p=>[p.name,p]).sort((a,b)=>b[1].n-a[1].n||b[1].own-a[1].own);
+  const P={'1':'ມື້ນີ້','7':'7 ມື້','30':'30 ມື້','all':'ທັງໝົດ'};
+  $('rp').innerHTML=`
+    <div class="rptop"><div><h2>ລາຍງານຜົນການຕິດຕາມ</h2>
+      <p class="sub" style="margin:0">ນັບຕາມການບັນທຶກລ່າສຸດຂອງແຕ່ລະລູກຄ້າ · ອັບເດດທັນທີເມື່ອທີມບັນທຶກ</p></div>
+      <div class="seg" role="group" aria-label="ຊ່ວງເວລາ">${Object.entries(P).map(([k,v])=>`<button type="button" data-p="${k}" aria-pressed="${k===rpP}">${v}</button>`).join('')}</div></div>
+    <div class="tiles">${tiles.map(([l,v,s])=>`<div class="tile"><div class="l">${l}</div><div class="v">${v.toLocaleString()}</div><div class="s">${esc(s)}</div></div>`).join('')}</div>
+    <div class="grid2">
+      <div class="card"><h2>ລາຍການທີ່ບັນທຶກຕໍ່ມື້</h2><p class="sub">14 ມື້ຫຼ້າສຸດ · ທຸກແຖບ</p>
+        <div class="cols" role="img" aria-label="ລາຍການທີ່ບັນທຶກຕໍ່ມື້ 14 ມື້ຫຼ້າສຸດ">${per.map((n,i)=>`<div class="c" title="${dl(days[i])}: ${n} ລາຍການ"><i style="height:${n/mx*100}%"></i>${(i===top&&n)||i===13?`<b style="bottom:calc(${n/mx*100}% + 2px)">${n}</b>`:''}</div>`).join('')}</div>
+        <div class="xlab">${days.map((d,i)=>`<span>${i%2?'':dl(d)}</span>`).join('')}</div></div>
+      <div class="card" style="min-width:0"><h2>ຄວາມຄືບໜ້າແຕ່ລະແຖບ</h2><p class="sub">ສຳເລັດ / ທັງໝົດ · ສີສົ້ມ = ກຳລັງຕິດຕາມ</p>
+        <div class="tblw"><table><tbody>${qp.map(p=>`<tr><td>${esc(CFG[p.q].name)}</td><td style="width:45%;min-width:130px">${bar(p)}</td><td class="r">${p.n?Math.round(p.d/p.n*100):0}%</td></tr>`).join('')}</tbody></table></div></div>
+    </div>
+    <div class="grid2" style="margin-top:20px">
+      <div class="card" style="min-width:0"><div class="rptop" style="margin-bottom:8px"><h2>ຜົນການຕິດຕາມ</h2>
+        <select id="rpq" aria-label="ເລືອກແຖບ">${Object.keys(CFG).map(q=>`<option value="${q}"${q===rpQ?' selected':''}>${esc(CFG[q].name)}</option>`).join('')}</select></div>
+        <p class="sub">${rq.length} ລາຍການທີ່ເລືອກຜົນແລ້ວ · ${P[rpP]}</p>
+        <div class="hb">${rs.map(([r,n])=>`<span>${esc(r)}</span><span class="t" title="${esc(r)}: ${n}"><i style="width:${n/rmx*100}%"></i></span><span class="n">${n}</span>`).join('')}</div></div>
+      <div class="card" style="min-width:0"><h2>ຜົນງານແຕ່ລະຄົນ</h2><p class="sub">${P[rpP]}</p>
+        ${pl.length?`<div class="tblw"><table><thead><tr><th>ຜູ້ເຮັດ</th><th class="r">ຄັ້ງທີ່ຕິດຕາມ</th><th class="r">ປິດສຳເລັດ</th><th class="r">ວຽກຄ້າງໃນມື</th><th class="r">ນັດຮອດກຳນົດ</th><th>ລ່າສຸດ</th></tr></thead>
+        <tbody>${pl.map(([n,p])=>`<tr><td>${esc(n)}</td><td class="r">${p.n}</td><td class="r">${p.d}</td><td class="r">${p.own}</td><td class="r">${p.due?`<span class="chip c-crit">${p.due}</span>`:0}</td><td class="mono">${fmtT(p.last)}</td></tr>`).join('')}</tbody></table></div>`
+        :`<div class="empty">ຍັງບໍ່ມີການບັນທຶກໃນຊ່ວງນີ້ · ເມື່ອທີມບັນທຶກຜົນໃນແຖບຕ່າງໆ ຈະສະແດງຢູ່ນີ້</div>`}</div>
+    </div>`;
+}
+$('rp').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b){rpP=b.dataset.p;report();}});
+$('rp').addEventListener('change',e=>{if(e.target.id==='rpq'){rpQ=e.target.value;report();}});
+
+// one row per customer code: the same customer can sit in two lists, newest edit wins per field
+function pendingByCode(){
+  const by={};
+  Object.entries(TR).filter(([k])=>pendLoo(k)).sort((a,b)=>(a[1].fixAt||0)-(b[1].fixAt||0)).forEach(([k,t])=>{
+    const r=by[t.c]??={c:t.c,n:t.n,o:IDX.get(k),fix:{},by:'',at:0};
+    Object.assign(r.fix,t.fix);r.by=nm(t.fixById,t.fixBy)||byN(t);r.at=t.fixAt||t.at;
+  });
+  return Object.values(by);
+}
+const csvq=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+const PROV={'ເມືອງ ທ່າແຂກ':'ແຂວງຄຳມ່ວນ','ເມືອງ ວັງວຽງ':'ແຂວງວຽງຈັນ','ເມືອງ ຫ້ວຍຊາຍ':'ແຂວງບໍ່ແກ້ວ','ເມືອງ ແປກ':'ແຂວງຊຽງຂວາງ','ເມືອງ ລະຄອນເພັງ':'ແຂວງສາລະວັນ','ເມືອງ ປາກຊັນ':'ແຂວງບໍລິຄຳໄຊ'};
+const VTE=['ເມືອງ ຈັນທະບູລີ','ເມືອງ ສີໂຄດຕະບອງ','ເມືອງ ໄຊເສດຖາ','ເມືອງ ສີສັດຕະນາກ','ເມືອງ ນາຊາຍທອງ','ເມືອງ ໄຊທານີ','ເມືອງ ຫາດຊາຍຟອງ','ເມືອງ ສັງທອງ','ເມືອງ ປາກງື່ມ'];
+const provOf=d=>VTE.includes(d)?'ນະຄອນຫຼວງວຽງຈັນ':PROV[d]||'';
+// LOO import template: every column filled with the new value, else the value LOO already has
+function looCsv(){
+  const rs=pendingByCode(); if(!rs.length) return '';
+  const head=['ລຳດັບ','ວັນທີຂາຍ','ເລກທີບິນ','ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ','ເບີໂທຕິດຕໍ່','ປະເພດລູກຄ້າ','ບ້ານ','ເມືອງ','ແຂວງ'];
+  return '﻿'+[head.map(csvq).join(','),...rs.map((r,i)=>{
+    const v=f=>r.fix[f]||(r.o?curOf(r.o,f):'');
+    // the audit only knows a customer's current type when it flagged it as still RETAIL
+    const ty=r.fix.ctype||(r.o&&missOf(r.o).includes(10)?'RETAIL':'');
+    return [i+1,'','',r.c,v('name')||r.n,v('phone'),ty,v('village'),v('district'),provOf(v('district'))].map(csvq).join(',');
+  })].join('\r\n');
+}
+// every edited field, including the ones the LOO template has no column for
+function fullFixCsv(){
+  const rs=pendingByCode(); if(!rs.length) return '';
+  const head=['ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ (ເດີມ)',...FIXF.map(x=>x.l),'ຜູ້ແກ້','ເວລາແກ້'];
+  return '﻿'+[head.map(csvq).join(','),...rs.map(r=>[r.c,r.n,...FIXF.map(x=>r.fix[x.f]),r.by,fmtT(r.at)].map(csvq).join(','))].join('\r\n');
+}
+
+function csv(){
+  const head=['ແຖບ','ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ','ສະຖານະ','ຜົນ','ບັນທຶກ','ອັບເດດໃນ LOO','ຜູ້ຮັບວຽກ','ນັດ','ຈຳນວນຄັ້ງ','ຜູ້ເຮັດລ່າສຸດ','ເວລາ'];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const lines=Object.values(TR).sort((a,b)=>a.q.localeCompare(b.q)||(a.at||0)-(b.at||0))
+    .map(t=>[CFG[t.q]?.name,t.c,t.n,ST[t.st||'todo'],t.res,t.note,t.loo?'✓':'',ownN(t),t.next,tries(t),byN(t),fmtT(t.at)].map(q).join(','));
+  return '﻿'+[head.map(q).join(','),...lines].join('\r\n');
+}
+
+// Web version: data and results live behind the team PIN in Supabase (cust-api edge function).
+const API='https://xpehjmiymlxqbydczppu.supabase.co/functions/v1/cust-api';
+const POLL_MS=20000;
+
+async function api(action,extra={}){
+  const r=await fetch(API,{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({action,pin:store.get('pin')||'',...extra})});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw Object.assign(new Error(j.error||('HTTP '+r.status)),{code:j.error||'http',status:r.status});
+  return j;
+}
+const gateMsg=e=>e.status===401?'ລະຫັດທີມບໍ່ຖືກ':e.status===429?'ລອງຜິດຫຼາຍເທື່ອ ລໍຖ້າ 15 ນາທີ ແລ້ວລອງໃໝ່':'ເຊື່ອມຕໍ່ບໍ່ໄດ້ ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່';
+
+// Nobody sees data or saves anything until they give the team PIN and their name.
+function ensureLogin(){
+  return new Promise(done=>{
+    const g=$('gate'), f=$('gateF');
+    $('gPin').value=store.get('pin')||'';$('gName').value=store.get('who')||'';
+    const ok=()=>{g.hidden=true;done();};
+    if(store.get('pin')&&(store.get('who')||'').length>=2){
+      api('auth').then(ok).catch(e=>{g.hidden=false;$('gErr').textContent=gateMsg(e);});
+    } else g.hidden=false;
+    f.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const pin=$('gPin').value.trim(), name=$('gName').value.trim().replace(/\s+/g,' ');
+      if(name.length<2){$('gErr').textContent='ກະລຸນາໃສ່ຊື່ຜູ້ເຮັດ (ຢ່າງໜ້ອຍ 2 ຕົວອັກສອນ)';$('gName').focus();return;}
+      if(!pin){$('gErr').textContent='ກະລຸນາໃສ່ລະຫັດທີມ';$('gPin').focus();return;}
+      store.set('pin',pin);store.set('who',name);$('gErr').textContent='ກຳລັງກວດ…';
+      try{await api('auth');ok();}catch(err){$('gErr').textContent=gateMsg(err);}
+    });
+  });
+}
+
+// Same surface the page uses for the claude.ai store: collection('track').onSnapshot / doc(k).set
+function webDb(){
+  const rows=new Map(); let since=null, cb=null, errCb=null;
+  const emit=()=>cb&&cb({docs:[...rows].map(([id,b])=>({id,data:()=>b}))});
+  async function poll(){
+    try{
+      const j=await api('list',since?{since}:{});
+      j.rows.forEach(r=>{rows.set(r.k,r.body);if(!since||r.updated_at>since) since=r.updated_at;});
+      if(j.rows.length||!poll.done) emit();
+      poll.done=true;
+    }catch(e){
+      if(e.status===401){store.set('pin','');location.reload();return;}
+      errCb&&errCb({code:e.code});
+    }
+  }
+  return {collection:()=>({
+    onSnapshot(next,err){
+      cb=next;errCb=err;poll();
+      setInterval(()=>{if(!document.hidden) poll();},POLL_MS);
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden) poll();});
+      return()=>{};
+    },
+    doc:k=>({set:async body=>{await api('save',{k,body});rows.set(k,JSON.parse(JSON.stringify(body)));emit();}})
+  })};
+}
+
+const webDownloads={save:async({filename,data})=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  return {status:'saved'};
+}};
+
+(async()=>{
+  $('loading').hidden=true;
+  await ensureLogin();
+  $('loading').hidden=false;
+  try{D=await api('data');}
+  catch(e){$('loading').hidden=true;$('banner').hidden=false;$('banner').textContent='ໂຫຼດຂໍ້ມູນລູກຄ້າບໍ່ໄດ້ ລອງໂຫຼດໜ້າໃໝ່ ('+e.code+')';return;}
+  // repeated strings ship as indexes into D.S to keep the file small
+  const dec=x=>typeof x==='number'?D.S[x]:x;
+  for(const q of Object.keys(CFG)) D[q].r=D[q].r.map(r=>[r[0],r[1],r[2],r[3],dec(r[4]),dec(r[5]),dec(r[6]),dec(r[7]),r[8].map(dec)]);
+  $('loading').hidden=true;
+  IDX=new Map(Object.keys(CFG).flatMap(R).map(o=>[o.k,o]));
+  for(const o of IDX.values()){if(!BYCODE.has(o.c)) BYCODE.set(o.c,[]);BYCODE.get(o.c).push(o);}
+  const uq=l=>[...new Set([...IDX.values()].map(o=>fld(o,l)).filter(Boolean))].sort();
+  const dl=(id,v)=>`<datalist id="${id}">${v.map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist>`;
+  document.body.insertAdjacentHTML('beforeend',dl('dl-district',uq('ເມືອງ'))+dl('dl-branch',uq('ສາຂາ (ລະບົບ)')));
+  // the name given at the gate is the name on every save; change it only by switching user
+  $('who').value=store.get('who');$('who').readOnly=true;$('who').title='ປ່ຽນຊື່: ກົດ "ປ່ຽນຜູ້ໃຊ້"';
+  $('switchUser').hidden=false;
+  $('switchUser').addEventListener('click',()=>{store.set('who','');location.reload();});
+  const h=location.hash.slice(1); go(CFG[h]||['rp','lg','gd'].includes(h)?h:'ov');
+  db=webDb();
+  db.collection('track').onSnapshot(s=>{TR={};s.docs.forEach(x=>{TR[x.id]=x.data()});refresh();},
+    err=>{$('banner').hidden=false;$('banner').textContent='ການເຊື່ອມຕໍ່ຂາດ ຈະລອງໃໝ່ເອງ ('+err.code+')';});
+  refresh();
+  const dls=webDownloads;
+  $('exp').hidden=false;$('exp').addEventListener('click',()=>dls.save({filename:'VARI_ຜົນຕິດຕາມ_'+ymd(Date.now())+'.csv',data:csv()}));
+  const offer=(btn,fn,name)=>{$(btn).hidden=false;$(btn).addEventListener('click',()=>{
+    const c=fn();
+    if(!c){$('banner').hidden=false;$('banner').textContent='ຍັງບໍ່ມີຂໍ້ມູນແກ້ທີ່ລໍຖ້າເຂົ້າ LOO';return;}
+    dls.save({filename:name+ymd(Date.now())+'.csv',data:c});
+  });};
+  offer('expLoo',looCsv,'VARI_ນຳເຂົ້າ_LOO_');
+  offer('expFix',fullFixCsv,'VARI_ຂໍ້ມູນແກ້_ຄົບທຸກຊ່ອງ_');
+})();
+
+</script>
+</body>
+</html>
