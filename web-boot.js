@@ -59,7 +59,7 @@ function webDb(){
 
 const webDownloads={save:async({filename,data})=>{
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([data],{type:'text/csv;charset=utf-8'}));a.download=filename;
+  a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type:'text/csv;charset=utf-8'}));a.download=filename;
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
   return {status:'saved'};
 }};
@@ -89,6 +89,7 @@ const webDownloads={save:async({filename,data})=>{
     err=>{$('banner').hidden=false;$('banner').textContent='ການເຊື່ອມຕໍ່ຂາດ ຈະລອງໃໝ່ເອງ ('+err.code+')';});
   refresh();
   const dls=webDownloads;
+  DLS=dls;$('xlsxBtn').hidden=false;
   $('exp').hidden=false;$('exp').addEventListener('click',()=>dls.save({filename:'VARI_ຜົນຕິດຕາມ_'+ymd(Date.now())+'.csv',data:csv()}));
   const offer=(btn,fn,name)=>{$(btn).hidden=false;$(btn).addEventListener('click',()=>{
     const c=fn();

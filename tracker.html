@@ -251,6 +251,7 @@ button.lnk{border:0;background:none;padding:0;color:var(--accent);text-align:lef
           <li><b>ທຸກມື້ (ແອັດມິນ):</b> ກວດແຖບ "ລາຍງານຜົນ" ຊ່ວງ "ມື້ນີ້" ວ່າບັນທຶກຄົບທຸກສາຍທີ່ໂທ</li>
           <li><b>ທ້າຍອາທິດ (ຜູ້ຈັດການ):</b> ເບິ່ງ "ລາຍງານຜົນ" ຊ່ວງ 7 ມື້ · ຜົນງານແຕ່ລະຄົນ · ສາຂາທີ່ຄ້າງຫຼາຍໃນ "ພາບລວມ"</li>
           <li><b>ການເຄື່ອນໄຫວ:</b> ແຖບ "ການເຄື່ອນໄຫວ" ສະແດງທຸກການບັນທຶກ ແລະ ການຮັບວຽກ ວ່າໃຜ ເຮັດຫຍັງ ກັບລູກຄ້າໃດ ເວລາໃດ · ກັ່ນຕອງຕາມຄົນ ແລະ ແຖບໄດ້</li>
+          <li><b>ສົ່ງອອກ Excel:</b> ໃນແຕ່ລະແຖບ ກັ່ນຕອງແລ້ວກົດ "ສົ່ງອອກ Excel" ໄດ້ທຸກລາຍການຕາມຕົວກອງ ພ້ອມພຶດຕິກຳ ສາຂາ ຄົນຂັບ · ໃນ Excel ກັ່ນຕອງຕໍ່ໄດ້ທຸກຖັນ ແລ້ວສົ່ງໃຫ້ສາຂາ / ທີມສົ່ງ</li>
           <li><b>ສົ່ງອອກ CSV:</b> ໃຊ້ແກ້ LOO ເປັນຊຸດ ຫຼື ເກັບເປັນຫຼັກຖານປະຈຳອາທິດ</li>
           <li><b>ເປົ້າໝາຍ:</b> ລາຍການ "ດ່ວນຫຼາຍ" ແລະ "ດ່ວນ" ສຳເລັດພາຍໃນອາທິດທຳອິດ</li>
         </ul>
@@ -285,7 +286,8 @@ button.lnk{border:0;background:none;padding:0;color:var(--accent);text-align:lef
       <select id="fsort" aria-label="ຮຽງລຳດັບ"></select>
     </div>
     <div class="cntrow"><div class="count" id="cnt"></div>
-      <button id="claimN" type="button">ຮັບ 20 ລາຍການທຳອິດທີ່ຍັງບໍ່ມີຜູ້ຮັບ</button><span class="saved" id="claimMsg"></span></div>
+      <button id="claimN" type="button">ຮັບ 20 ລາຍການທຳອິດທີ່ຍັງບໍ່ມີຜູ້ຮັບ</button>
+      <button id="xlsxBtn" type="button" hidden>ສົ່ງອອກ Excel</button><span class="saved" id="claimMsg"></span></div>
     <div class="list" id="list"></div>
     <button class="more" id="more" hidden>ສະແດງເພີ່ມ</button>
   </section>
@@ -620,6 +622,7 @@ function stChip(o){
 function list(){
   const f=filtered();
   $('cnt').textContent=`ສະແດງ ${Math.min(shown,f.length).toLocaleString()} ຈາກ ${f.length.toLocaleString()} ລາຍ`;
+  $('xlsxBtn').textContent=`ສົ່ງອອກ Excel (${f.length.toLocaleString()} ລາຍ)`;$('xlsxBtn').disabled=!f.length;
   $('list').innerHTML=f.length?f.slice(0,shown).map(rowHtml).join(''):`<div class="empty">ບໍ່ມີລາຍການທີ່ກົງກັບການກັ່ນຕອງ</div>`;
   $('more').hidden=f.length<=shown;
 }
@@ -718,6 +721,62 @@ function jumpTo(q,code){
   go(q,{st:''});$('fs').value='';$('fq').value=code;
   const hit=rows.find(r=>r.c===code);open=hit?hit.k:null;list();
 }
+
+// Excel of the list on screen (every row the filters match, not just the rows drawn)
+let DLS=null;
+const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+const XLSX_SRI='sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==';
+const loadXlsx=()=>window.XLSX?Promise.resolve():new Promise((ok,no)=>{
+  const t=document.createElement('script');t.src=XLSX_URL;t.integrity=XLSX_SRI;t.crossOrigin='anonymous';
+  t.onload=ok;t.onerror=()=>no(new Error('load'));document.head.appendChild(t);
+});
+const XNUM=['ບໍ່ສັ່ງມາ (ມື້)','ປົກກະຕິສັ່ງທຸກ (ມື້)','ບິນ 2026','ບິນ 90 ມື້','ຕຸກ 90 ມື້','ຕຸກມັດຈຳ','ມັດຈຳລວມ (ກີບ)'];
+const XDROP=['ຄວາມສຳຄັນ','ທີມ / ຄົນສົ່ງລ່າສຸດ','ພຶດຕິກຳການສັ່ງ','ມື້ຈັດສົ່ງ','ຂໍ້ມູນທີ່ຂາດ'];
+const xNum=v=>{const n=Number(String(v).replace(/,/g,''));return v!==''&&Number.isFinite(n)?n:v;};
+// "DRIVER: A, HELPER: B, HELPER: C" → driver or team in one column, helpers in another
+function crewOf(o){
+  for(const x of BYCODE.get(o.c)||[o]){
+    const s=fld(x,'ທີມ / ຄົນສົ່ງລ່າສຸດ');
+    if(s){const ps=String(s).split(',').map(p=>p.trim());
+      return {lead:teamParts(ps.filter(p=>!/^HELPER\s*:/i.test(p)).join(',')).join(', '),help:teamParts(ps.filter(p=>/^HELPER\s*:/i.test(p)).join(',')).join(', ')};}
+  }
+  return {lead:'',help:''};
+}
+const unitOf=b=>!b||b==='ບໍ່ລະບຸ'?'ບໍ່ລະບຸ':b.includes('ສຳນັກງານ')?'ສຳນັກງານໃຫຍ່':'ສາຂາ';
+function xlsxRows(list,q){
+  const extra=D[q].h.filter(l=>!XDROP.includes(l));
+  return list.map(o=>{
+    const t=TR[o.k]||{}, sug=sugParse(o), crew=crewOf(o), r={};
+    r['ລະຫັດລູກຄ້າ']=o.c;r['ຊື່ລູກຄ້າ']=o.n;r['ເບີໂທ']=o.p;
+    r['ຂຶ້ນກັບ']=unitOf(o.b);r['ສາຂາ']=o.b;r['ຄົນຂັບ / ທີມ']=crew.lead;r['ຜູ້ຊ່ວຍ']=crew.help;
+    if(D[q].h.includes('ຄວາມສຳຄັນ')) r['ຄວາມສຳຄັນ']=o.pr;
+    r['ພຶດຕິກຳການສັ່ງ']=t.fix?.behav||oldOf(o,'behav');r['ພຶດຕິກຳ (ແນະນຳຈາກບິນ)']=sug.behav||'';
+    r['ມື້ຈັດສົ່ງ']=t.fix?.days||oldOf(o,'days');r['ມື້ສົ່ງ (ແນະນຳຈາກບິນ)']=sug.days||'';
+    extra.forEach(l=>{const v=fld(o,l);r[l]=XNUM.includes(l)?xNum(v):v;});
+    r['ຂໍ້ມູນທີ່ຂາດ']=missOf(o).map(i=>D.fx[i]).join(', ');
+    r['ສະຖານະຕິດຕາມ']=ST[t.st||'todo'];r['ຜົນ']=t.res||'';r['ບັນທຶກ']=t.note||'';r['ຂໍ້ມູນທີ່ແກ້ແລ້ວ']=fixLine(t);
+    r['ຜູ້ຮັບວຽກ']=ownN(t);r['ນັດ']=t.next||'';r['ຈຳນວນຄັ້ງ']=tries(t);r['ອັບເດດໃນ LOO']=t.loo?'✓':'';
+    return r;
+  });
+}
+$('xlsxBtn').addEventListener('click',async()=>{
+  const m=$('claimMsg'), b=$('xlsxBtn'), list=filtered();
+  if(!list.length||!DLS) return;
+  b.disabled=true;m.textContent='ກຳລັງສ້າງໄຟລ໌ Excel…';
+  try{
+    await loadXlsx();
+    const rs=xlsxRows(list,view), ws=XLSX.utils.json_to_sheet(rs), head=Object.keys(rs[0]);
+    ws['!autofilter']={ref:ws['!ref']};
+    ws['!cols']=head.map(h=>({wch:Math.min(36,Math.max(h.length+4,...rs.slice(0,200).map(r=>String(r[h]??'').length+2)))}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,CFG[view].name.replace(/[\\/?*[\]:]/g,' ').slice(0,31));
+    const data=new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const part=$('fb').value?'_'+$('fb').value.replace(/[^\p{L}\p{M}\p{N}]+/gu,'-'):'';
+    await DLS.save({filename:`VARI_${CFG[view].name.replace(/[^\p{L}\p{M}\p{N}]+/gu,'-')}${part}_${ymd(Date.now())}.xlsx`,data});
+    m.textContent=`ສົ່ງອອກແລ້ວ ${list.length.toLocaleString()} ລາຍ`;
+  }catch(e){m.textContent=e.message==='load'?'ໂຫຼດຕົວສ້າງ Excel ບໍ່ໄດ້ ກວດອິນເຕີເນັດ ແລ້ວລອງໃໝ່':'ສ້າງໄຟລ໌ບໍ່ສຳເລັດ: '+e.message;}
+  b.disabled=false;
+});
 
 let lgP='7', lgW='', lgQ='', lgShown=100;
 function activity(){
@@ -941,7 +1000,7 @@ function csv(){
   db.collection('track').onSnapshot(s=>{TR={};s.docs.forEach(x=>{TR[x.id]=x.data()});refresh();resolveNames();},
     err=>{$('banner').hidden=false;$('banner').textContent='ການເຊື່ອມຕໍ່ຂາດ ໂຫຼດໜ້າໃໝ່ ('+err.code+')';});
   refresh();
-  if(dls){$('exp').hidden=false;$('exp').addEventListener('click',async()=>{
+  if(dls){DLS=dls;$('xlsxBtn').hidden=false;$('exp').hidden=false;$('exp').addEventListener('click',async()=>{
     try{await dls.save({filename:'VARI_ຜົນຕິດຕາມ_'+ymd(Date.now())+'.csv',data:csv()});}catch(e){}
   });
   const offer=(btn,fn,name)=>{$(btn).hidden=false;$(btn).addEventListener('click',async()=>{
