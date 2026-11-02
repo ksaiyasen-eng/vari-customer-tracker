@@ -92,9 +92,9 @@ const webDownloads={save:async({filename,data})=>{
   $('exp').hidden=false;$('exp').addEventListener('click',()=>dls.save({filename:'VARI_ຜົນຕິດຕາມ_'+ymd(Date.now())+'.csv',data:csv()}));
   const offer=(btn,fn,name)=>{$(btn).hidden=false;$(btn).addEventListener('click',()=>{
     const c=fn();
-    if(!c){$('banner').hidden=false;$('banner').textContent='ຍັງບໍ່ມີຂໍ້ມູນແກ້ທີ່ລໍຖ້າເຂົ້າ LOO';return;}
+    if(!c){$('banner').hidden=false;$('banner').textContent='ຍັງບໍ່ມີຂໍ້ມູນແກ້ໃຫ້ສົ່ງອອກ';return;}
     dls.save({filename:name+ymd(Date.now())+'.csv',data:c});
   });};
   offer('expLoo',looCsv,'VARI_ນຳເຂົ້າ_LOO_');
-  offer('expFix',fullFixCsv,'VARI_ຂໍ້ມູນແກ້_ຄົບທຸກຊ່ອງ_');
+  offer('expFix',changesCsv,'VARI_ລາຍການແກ້_ເດີມ-ໃໝ່_');
 })();

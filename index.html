@@ -139,6 +139,7 @@ td.wr{white-space:normal;min-width:200px}
 .fixg .days label{display:flex;gap:4px;align-items:center}
 .fixg .wide{grid-column:1/-1}
 .ferr{color:var(--crit);font-size:13px}
+.chg{display:block;font-size:13px}
 button.lnk{border:0;background:none;padding:0;color:var(--accent);text-align:left;font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .loading{display:flex;gap:12px;align-items:center;justify-content:center;padding:60px 0;color:var(--muted)}
 .spin{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);flex:none}
@@ -178,7 +179,7 @@ body{margin:0;font-size:14px}
         <button id="switchUser" type="button" hidden>ປ່ຽນຜູ້ໃຊ້</button>
         <button id="exp" hidden>ສົ່ງອອກຜົນ (CSV)</button>
         <button id="expLoo" hidden>ສົ່ງອອກຂໍ້ມູນແກ້ → LOO</button>
-        <button id="expFix" hidden>ຂໍ້ມູນແກ້ ຄົບທຸກຊ່ອງ</button>
+        <button id="expFix" hidden>ລາຍການແກ້ (ເດີມ → ໃໝ່)</button>
       </div>
     </div>
     <nav id="tabs" role="tablist"></nav>
@@ -229,7 +230,7 @@ body{margin:0;font-size:14px}
           <li>ກົດ "ບັນທຶກ" · ເບີໂທ ແລະ GPS ຖືກກວດຮູບແບບໃຫ້ (ເບີ 8 ຕົວ ເຕີມ 20 ໃຫ້ເອງ)</li>
           <li>ກັ່ນຕອງ "ຂໍ້ມູນທີ່ຂາດ" ເພື່ອແບ່ງວຽກ ເຊັ່ນ ຂາດ: ມື້ຈັດສົ່ງ · ແຖບ "ຂໍ້ມູນບໍ່ຄົບ" ແມ່ນລູກຄ້າສັ່ງປົກກະຕິ 1,830 ລາຍ ທີ່ບໍ່ຢູ່ແຖບອື່ນ</li>
           <li>ທ້າຍມື້ ກົດ "ສົ່ງອອກຂໍ້ມູນແກ້ → LOO": ໄດ້ໄຟລ໌ຕາມແບບນຳເຂົ້າ LOO (ລະຫັດ ຊື່ ເບີ ປະເພດ ບ້ານ ເມືອງ ແຂວງ) · ຊ່ອງທີ່ບໍ່ໄດ້ແກ້ ໃສ່ຂໍ້ມູນເດີມໃຫ້</li>
-          <li>GPS ສາຂາ ມື້ຈັດສົ່ງ ພຶດຕິກຳ ຕຸກມັດຈຳ ບໍ່ມີໃນແບບນຳເຂົ້າ LOO: ກົດ "ຂໍ້ມູນແກ້ ຄົບທຸກຊ່ອງ" ແລ້ວແກ້ໃນ LOO ດ້ວຍມື</li>
+          <li>GPS ສາຂາ ມື້ຈັດສົ່ງ ພຶດຕິກຳ ຕຸກມັດຈຳ ບໍ່ມີໃນແບບນຳເຂົ້າ LOO: ກົດ "ລາຍການແກ້ (ເດີມ → ໃໝ່)": ໄດ້ 1 ແຖວຕໍ່ 1 ຊ່ອງທີ່ແກ້ ບອກຂໍ້ມູນເດີມ ແລະ ຂໍ້ມູນໃໝ່ ແລ້ວແກ້ໃນ LOO ຕາມນັ້ນ</li>
           <li>ແກ້ໃນ LOO ແລ້ວ ກັ່ນຕອງສະຖານະ "ແກ້ຂໍ້ມູນແລ້ວ ລໍຖ້າເຂົ້າ LOO" ແລະ ໝາຍ "ອັບເດດໃນ LOO ແລ້ວ" ທີລະລາຍ</li>
           <li>ຖ້າແກ້ຂໍ້ມູນລູກຄ້າທີ່ເຂົ້າ LOO ແລ້ວອີກ ລະບົບຈະເອົາເຄື່ອງໝາຍ LOO ອອກ ເພື່ອໃຫ້ສົ່ງອອກຮອບໃໝ່</li>
         </ol>
@@ -434,14 +435,32 @@ function sugParse(o){
   return r;
 }
 function curOf(o,f){
-  return {name:o.n,phone:o.p,village:fld(o,'ບ້ານ'),district:fld(o,'ເມືອງ'),branch:fld(o,'ສາຂາ (ລະບົບ)'),
+  return {name:o.n,phone:o.p,village:fld(o,'ບ້ານ'),district:fld(o,'ເມືອງ'),branch:fld(o,'ສາຂາ (ລະບົບ)'),gps:fld(o,'GPS'),
     days:fld(o,'ມື້ຈັດສົ່ງ'),behav:fld(o,'ພຶດຕິກຳການສັ່ງ'),bottles:fld(o,'ຕຸກມັດຈຳ')}[f]||'';
 }
+// value LOO holds now: a customer's lists show different columns, so check them all
+function oldOf(o,f){
+  if(!o) return '';
+  if(f==='ctype') return missOf(o).includes(10)?'RETAIL':'';
+  for(const x of BYCODE.get(o.c)||[o]){const v=curOf(x,f);if(v) return v;}
+  return '';
+}
+const NOVAL='(ບໍ່ມີ)';
+const chgText=c=>`${FIXF.find(x=>x.f===c.f)?.l||c.f}: ${c.from||NOVAL} → ${c.to||'(ລົບຄ່າທີ່ແກ້)'}`;
+// saves made before changes were recorded only name the fields: show their current values
+function chgList(h,o,t){
+  if(h.changes) return h.changes;
+  const seg=(h.note||'').split(' · ').find(p=>p.startsWith('ແກ້ຂໍ້ມູນ:'));
+  if(!seg) return [];
+  return FIXF.filter(x=>seg.includes(x.l)&&t?.fix?.[x.f]).map(x=>({f:x.f,from:oldOf(o,x.f),to:t.fix[x.f]}));
+}
+const noteOf=h=>(h.note||'').split(' · ').filter(p=>!p.startsWith('ແກ້ຂໍ້ມູນ:')).join(' · ');
+const chgHtml=(h,o,t)=>chgList(h,o,t).map(c=>`<span class="chg">${esc(chgText(c))}</span>`).join('');
 function fixHtml(o,t,ro){
   const ms=missOf(o), fx=t.fix||{}, k=esc(o.k), sug=sugParse(o), hasSug=Object.keys(sug).length;
   const why=D.why[o.c];
   const field=x=>{
-    const miss=ms.includes(x.m)?' miss':'', v=fx[x.f]||'', cur=curOf(o,x.f), ph=cur?'ປັດຈຸບັນ: '+cur:'';
+    const miss=ms.includes(x.m)?' miss':'', v=fx[x.f]||'', cur=oldOf(o,x.f), ph=cur?'ປັດຈຸບັນ: '+cur:'';
     if(x.days){const sel=v.split(',').map(s=>s.trim());
       return `<div class="wide"><label class="${miss.trim()}" style="display:block;font-size:13px">${x.l}${cur?` <span class="asof">(ປັດຈຸບັນ: ${esc(cur)})</span>`:''}</label>
         <div class="days">${DAYS.map(d=>`<label><input type="checkbox" name="fx_days" value="${d}"${sel.includes(d)?' checked':''}${ro}> ${d}</label>`).join('')}</div></div>`;}
@@ -665,7 +684,7 @@ function detail(o){
       </div>
       ${logOf(t).length?`<ul class="hist" aria-label="ປະຫວັດການຕິດຕາມ">${logOf(t).slice().reverse().map(h=>`<li>
         <span class="when">${esc(fmtT(h.at))} · ${esc(logN(h))}</span>
-        <span>${h.kind==='claim'?'ຮັບວຽກ':esc(ST[h.st]||'')}${h.res?' · '+esc(h.res):''}${h.note?' — '+esc(h.note):''}</span></li>`).join('')}</ul>`:''}
+        <span>${h.kind==='claim'?'ຮັບວຽກ':esc(ST[h.st]||'')}${h.res?' · '+esc(h.res):''}${noteOf(h)?' — '+esc(noteOf(h)):''}${chgHtml(h,o,t)}</span></li>`).join('')}</ul>`:''}
     </form></div>`;
 }
 const fmtT=ms=>ms?new Date(ms).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
@@ -713,10 +732,10 @@ $('list').addEventListener('submit',async e=>{
     ...(ownK(TR[k])?{}:ownPatch()),fix:rf.fix};
   // edited data must go into LOO again, so a change clears the LOO tick unless it is ticked in this save
   if(changed){patch.fixAt=at;Object.assign(patch,MYID?{fixById:MYID,fixBy:''}:{fixBy:me(),fixById:''});if(TR[k]?.loo&&el.loo?.checked) patch.loo=false;}
-  const fixNote=changed&&Object.keys(rf.fix).length?'ແກ້ຂໍ້ມູນ: '+FIXF.filter(x=>rf.fix[x.f]).map(x=>x.l).join(', '):'';
+  const changes=FIXF.filter(x=>(old[x.f]||'')!==(rf.fix[x.f]||'')).map(x=>({f:x.f,from:old[x.f]||oldOf(IDX.get(k),x.f),to:rf.fix[x.f]||''})).filter(c=>c.from!==c.to);
   msg.textContent='ກຳລັງບັນທຶກ…';
   // redraw after save: the snapshot refresh skips while focus is still inside the form
-  try{await save(k,patch,{at,...meStamp(),st,res:patch.res,note:[patch.note,fixNote].filter(Boolean).join(' · ')});document.activeElement?.blur();refresh();}
+  try{await save(k,patch,{at,...meStamp(),st,res:patch.res,note:patch.note,...(changes.length?{changes}:{})});document.activeElement?.blur();refresh();}
   catch(err){msg.textContent='ບັນທຶກບໍ່ສຳເລັດ: '+(err.code==='permission_denied'?'ບໍ່ມີສິດແກ້ໄຂ ຂໍສິດຈາກເຈົ້າຂອງ':err.message||err.code);}
 });
 $('more').addEventListener('click',()=>{shown+=60;list()});
@@ -745,7 +764,7 @@ function activity(){
     ${ev.length?`<div class="card" style="padding:0"><div class="tblw"><table><thead><tr><th>ເວລາ</th><th>ຜູ້ເຮັດ</th><th>ລູກຄ້າ</th><th>ແຖບ</th><th>ການກະທຳ</th><th>ບັນທຶກ</th></tr></thead><tbody>
       ${ev.slice(0,lgShown).map(h=>`<tr><td class="mono">${esc(fmtT(h.at))}</td><td>${esc(logN(h))}</td>
         <td><button type="button" class="lnk" data-jump="${esc(h.t.q)}" data-code="${esc(h.t.c)}">${esc(h.t.n)}</button><div class="asof mono">${esc(h.t.c)}</div></td>
-        <td>${esc(CFG[h.t.q]?.name||'')}</td><td>${esc(act(h))}</td><td class="wr">${esc(h.note||'')}</td></tr>`).join('')}
+        <td>${esc(CFG[h.t.q]?.name||'')}</td><td>${esc(act(h))}</td><td class="wr">${esc(noteOf(h))}${chgHtml(h,IDX.get(h.k),h.t)}</td></tr>`).join('')}
     </tbody></table></div></div>
     ${ev.length>lgShown?`<button class="more" type="button" data-lmore>ສະແດງເພີ່ມ</button>`:''}`
     :`<div class="empty">ຍັງບໍ່ມີການເຄື່ອນໄຫວໃນຊ່ວງນີ້ · ເມື່ອທີມບັນທຶກຜົນ ຫຼື ຮັບວຽກ ຈະສະແດງຢູ່ນີ້</div>`}`;
@@ -884,18 +903,37 @@ function looCsv(){
     return [i+1,'','',r.c,v('name')||r.n,v('phone'),ty,v('village'),v('district'),provOf(v('district'))].map(csvq).join(',');
   })].join('\r\n');
 }
-// every edited field, including the ones the LOO template has no column for
-function fullFixCsv(){
-  const rs=pendingByCode(); if(!rs.length) return '';
-  const head=['ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ (ເດີມ)',...FIXF.map(x=>x.l),'ຜູ້ແກ້','ເວລາແກ້'];
-  return '﻿'+[head.map(csvq).join(','),...rs.map(r=>[r.c,r.n,...FIXF.map(x=>r.fix[x.f]),r.by,fmtT(r.at)].map(csvq).join(','))].join('\r\n');
+// one row per changed field with old and new value, for entering in LOO by hand
+function changesCsv(){
+  const by={};
+  Object.entries(TR).filter(([,t])=>hasFix(t)).sort((a,b)=>(a[1].fixAt||0)-(b[1].fixAt||0)).forEach(([k,t])=>{
+    const r=by[t.c]??={c:t.c,n:t.n,o:IDX.get(k),rows:{}};
+    for(const x of FIXF) if(t.fix[x.f]) r.rows[x.f]={l:x.l,f:x.f,to:t.fix[x.f],t};
+  });
+  const out=[];
+  for(const r of Object.values(by)) for(const x of Object.values(r.rows)){
+    const from=oldOf(r.o,x.f);
+    if(from===x.to) continue;   // same as LOO: nothing to enter
+    out.push({r,x,from});
+  }
+  if(!out.length) return '';
+  const pend=e=>e.x.t.loo?1:0;   // still to enter first, each customer's rows together
+  const order=[...new Set(out.slice().sort((a,b)=>pend(a)-pend(b)).map(e=>e.r.c))];
+  out.sort((a,b)=>order.indexOf(a.r.c)-order.indexOf(b.r.c));
+  const head=['ລຳດັບ','ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ','ເບີໂທ','ບ້ານ','ເມືອງ','ຊ່ອງທີ່ແກ້','ຂໍ້ມູນເດີມ','ຂໍ້ມູນໃໝ່','ບັນທຶກ','ຜູ້ແກ້','ເວລາແກ້','ແຖບ','ເຂົ້າ LOO ແລ້ວ'];
+  return '\ufeff'+[head.map(csvq).join(','),...out.map(({r,x,from},i)=>{
+    const t=x.t;
+    return [i+1,r.c,r.n,oldOf(r.o,'phone'),oldOf(r.o,'village'),oldOf(r.o,'district'),x.l,from||NOVAL,x.to,t.note,
+      nm(t.fixById,t.fixBy)||byN(t),fmtT(t.fixAt||t.at),CFG[t.q]?.name,t.loo?'✓':''].map(csvq).join(',');
+  })].join('\r\n');
 }
 
+const fixLine=t=>FIXF.filter(x=>t.fix?.[x.f]).map(x=>`${x.l}: ${t.fix[x.f]}`).join(' ; ');
 function csv(){
-  const head=['ແຖບ','ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ','ສະຖານະ','ຜົນ','ບັນທຶກ','ອັບເດດໃນ LOO','ຜູ້ຮັບວຽກ','ນັດ','ຈຳນວນຄັ້ງ','ຜູ້ເຮັດລ່າສຸດ','ເວລາ'];
+  const head=['ແຖບ','ລະຫັດລູກຄ້າ','ຊື່ລູກຄ້າ','ສະຖານະ','ຜົນ','ບັນທຶກ','ຂໍ້ມູນທີ່ແກ້','ອັບເດດໃນ LOO','ຜູ້ຮັບວຽກ','ນັດ','ຈຳນວນຄັ້ງ','ຜູ້ເຮັດລ່າສຸດ','ເວລາ'];
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   const lines=Object.values(TR).sort((a,b)=>a.q.localeCompare(b.q)||(a.at||0)-(b.at||0))
-    .map(t=>[CFG[t.q]?.name,t.c,t.n,ST[t.st||'todo'],t.res,t.note,t.loo?'✓':'',ownN(t),t.next,tries(t),byN(t),fmtT(t.at)].map(q).join(','));
+    .map(t=>[CFG[t.q]?.name,t.c,t.n,ST[t.st||'todo'],t.res,t.note,fixLine(t),t.loo?'✓':'',ownN(t),t.next,tries(t),byN(t),fmtT(t.at)].map(q).join(','));
   return '﻿'+[head.map(q).join(','),...lines].join('\r\n');
 }
 
@@ -993,11 +1031,11 @@ const webDownloads={save:async({filename,data})=>{
   $('exp').hidden=false;$('exp').addEventListener('click',()=>dls.save({filename:'VARI_ຜົນຕິດຕາມ_'+ymd(Date.now())+'.csv',data:csv()}));
   const offer=(btn,fn,name)=>{$(btn).hidden=false;$(btn).addEventListener('click',()=>{
     const c=fn();
-    if(!c){$('banner').hidden=false;$('banner').textContent='ຍັງບໍ່ມີຂໍ້ມູນແກ້ທີ່ລໍຖ້າເຂົ້າ LOO';return;}
+    if(!c){$('banner').hidden=false;$('banner').textContent='ຍັງບໍ່ມີຂໍ້ມູນແກ້ໃຫ້ສົ່ງອອກ';return;}
     dls.save({filename:name+ymd(Date.now())+'.csv',data:c});
   });};
   offer('expLoo',looCsv,'VARI_ນຳເຂົ້າ_LOO_');
-  offer('expFix',fullFixCsv,'VARI_ຂໍ້ມູນແກ້_ຄົບທຸກຊ່ອງ_');
+  offer('expFix',changesCsv,'VARI_ລາຍການແກ້_ເດີມ-ໃໝ່_');
 })();
 
 </script>
