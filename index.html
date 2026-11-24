@@ -749,8 +749,8 @@ function jumpTo(q,code){
 
 // Excel of the list on screen (every row the filters match, not just the rows drawn)
 let DLS=null;
-const XLSX_URL='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-const XLSX_SRI='sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==';
+const XLSX_URL='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+const XLSX_SRI='sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT';
 const loadXlsx=()=>window.XLSX?Promise.resolve():new Promise((ok,no)=>{
   const t=document.createElement('script');t.src=XLSX_URL;t.integrity=XLSX_SRI;t.crossOrigin='anonymous';
   t.onload=ok;t.onerror=()=>no(new Error('load'));document.head.appendChild(t);
